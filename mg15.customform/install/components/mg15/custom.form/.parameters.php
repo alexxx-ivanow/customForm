@@ -123,7 +123,13 @@ $arComponentParameters = [
 			"NAME" => 'Добавить чекбокс согласия',
 			"TYPE" => "CHECKBOX",			
 			"DEFAULT" => "Y",
-		],		
+		],
+        "IS_BOOTSTRAP" => [
+            "PARENT" => "FIELDS",
+            "NAME" => 'Подключить Bootstrap',
+            "TYPE" => "CHECKBOX",
+            "DEFAULT" => "Y",
+        ],
 		"IS_SEND_EMAIL" => [
 			"PARENT" => "ADDITIONAL",
 			"NAME" => 'Отправлять письмо',

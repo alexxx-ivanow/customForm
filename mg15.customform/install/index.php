@@ -34,11 +34,10 @@ class Mg15_Customform extends CModule
     public  $MODULE_GROUP_RIGHTS;
     public  $errors;
 
-    // конструктор класса, вызывается автоматически при обращение к классу
     function __construct()
     {
         // создаем пустой массив для файла version.php
-        $arModuleVersion = array();
+        $arModuleVersion = [];
         // подключаем файл version.php
         include_once(__DIR__ . '/version.php');
 
@@ -64,14 +63,8 @@ class Mg15_Customform extends CModule
         $this->MODULE_GROUP_RIGHTS = 'Y';
     }
 
-    // метод отрабатывает при установке модуля
     function DoInstall()
     {
-        //*************************************//
-        // Пример с установкой в один шаг      //
-        //*************************************//
-
-        // глобальная переменная с обстрактным классом
         global $APPLICATION;
         // регистрируем модуль в системе
         ModuleManager::RegisterModule("mg15.customform");
@@ -80,81 +73,26 @@ class Mg15_Customform extends CModule
         // создаем первую и единственную запись в БД
         //$this->addData();
         // регистрируем обработчики событий
-        //$this->InstallEvents();
         $this->InstallEmailEvents();
         // копируем файлы, необходимые для работы модуля
         $this->InstallFiles();
-        // устанавливаем агента
-        //$this->installAgents();
         // подключаем скрипт с административным прологом и эпилогом
         $APPLICATION->includeAdminFile(
             Loc::getMessage('INSTALL_TITLE'),
             __DIR__ . '/instalInfo.php'
         );
-
-        //*************************************//
-        // Пример с установкой в два шага      //
-        //*************************************//
-
-        // получаем контекст и из него запросы
-        /*$context = Application::getInstance()->getContext();
-        $request = $context->getRequest();
-        // глобальная переменная с обстрактным классом
-        global $APPLICATION;
-        // проверяем какой сейчас шаг, если он не существует или меньше 2, то выводим первый шаг установки
-        if ($request["step"] < 2) {
-            // подключаем скрипт с административным прологом и эпилогом
-            $APPLICATION->IncludeAdminFile(
-                Loc::getMessage('INSTALL_TITLE_STEP_1'),
-                __DIR__ . '/instalInfo-step1.php'
-            );
-        }
-        // проверяем какой сейчас шаг, усли 2, производим установку
-        if ($request["step"] == 2) {
-            // регистрируем модуль в системе
-            ModuleManager::RegisterModule("hmarketing.d7");
-            // создаем таблицы баз данных, необходимые для работы модуля
-            $this->InstallDB();
-            // регистрируем обработчики событий
-            $this->InstallEvents();
-            // копируем файлы, необходимые для работы модуля
-            $this->InstallFiles();
-            // устанавливаем агента
-            $this->installAgents();
-            // проверяим ответ формы введеный пользователем на первом шаге
-            if ($request["add_data"] == "Y") {
-                // создаем первую и единственную запись в БД
-                $this->addData();
-            }
-            // подключаем скрипт с административным прологом и эпилогом
-            $APPLICATION->IncludeAdminFile(
-                Loc::getMessage('INSTALL_TITLE_STEP_2'),
-                __DIR__ . '/instalInfo-step2.php'
-            );
-        }*/
-
-        // для успешного завершения, метод должен вернуть true
         return true;
     }
 
-    // метод отрабатывает при удалении модуля
     function DoUninstall()
     {
-        //*************************************//
-        // Пример с удалением в один шаг       //
-        //*************************************//
-
-        // глобальная переменная с обстрактным классом
         global $APPLICATION;
         // удаляем таблицы баз данных, необходимые для работы модуля
         //$this->UnInstallDB();
         // удаляем обработчики событий
-        //$this->UnInstallEvents();
         $this->UnInstallEmailEvents();
         // удаляем файлы, необходимые для работы модуля
         $this->UnInstallFiles();
-        // удаляем агента
-        //$this->unInstallAgents();
         // удаляем регистрацию модуля в системе
         ModuleManager::UnRegisterModule("mg15.customform");
         // подключаем скрипт с административным прологом и эпилогом
@@ -162,51 +100,6 @@ class Mg15_Customform extends CModule
             Loc::getMessage('DEINSTALL_TITLE'),
             __DIR__ . '/deInstalInfo.php'
         );
-
-        //*************************************//
-        // Пример с удалением в два шага       //
-        //*************************************//
-
-        // получаем контекст и из него запросы
-        /*$context = Application::getInstance()->getContext();
-        $request = $context->getRequest();
-        // глобальная переменная с обстрактным классом
-        global $APPLICATION;
-        // проверяем какой сейчас шаг, если он не существует или меньше 2, то выводим первый шаг удаления
-        if ($request["step"] < 2) {
-            // подключаем скрипт с административным прологом и эпилогом
-            $APPLICATION->IncludeAdminFile(
-                Loc::getMessage('DEINSTALL_TITLE_1'),
-                __DIR__ . '/deInstalInfo-step1.php'
-            );
-        }
-        // проверяем какой сейчас шаг, усли 2, производим удаление
-        if ($request["step"] == 2) {
-            // удаляем таблицы баз данных, необходимые для работы модуля
-            //$this->UnInstallDB();
-            // проверяим ответ формы введеный пользователем на первом шаге
-            if ($request["save_data"] == "Y") {
-                // удаляем таблицы баз данных, необходимые для работы модуля
-                $this->UnInstallDB();
-            }
-
-            // удаляем обработчики событий
-            $this->UnInstallEvents();
-            // удаляем файлы, необходимые для работы модуля
-            $this->UnInstallFiles();
-            // удаляем агента
-            $this->unInstallAgents();
-            // удаляем регистрацию модуля в системе
-            ModuleManager::UnRegisterModule("hmarketing.d7");
-
-            // подключаем скрипт с административным прологом и эпилогом
-            $APPLICATION->IncludeAdminFile(
-                Loc::getMessage('DEINSTALL_TITLE_2'),
-                __DIR__ . '/deInstalInfo-step2.php'
-            );
-        }*/
-
-        // для успешного завершения, метод должен вернуть true
         return true;
     }
 
@@ -247,6 +140,7 @@ class Mg15_Customform extends CModule
         Loader::includeModule($this->MODULE_ID);
         Events::InstallEvents();
         Events::InstallTemplates();
+        return true;
     }
 
     // метод для удаления почтовых событий и шаблонов
@@ -254,66 +148,6 @@ class Mg15_Customform extends CModule
     {
         Loader::includeModule($this->MODULE_ID);
         Events::UnInstallEvents();
-    }
-
-    // метод для создания обработчика событий
-    function InstallEvents()
-    {
-        // для произвольной работы
-        EventManager::getInstance()->registerEventHandler(
-            // идентификатор модуля-источника события
-            $this->MODULE_ID,
-            // событие на которое мы подписываемся, OnSomeEvent для произвольной работы
-            "OnSomeEvent",
-            // идентификатор модуля, который подписывается
-            $this->MODULE_ID,
-            // класс выполняющий обработку (для callback-обработчика, если файловый - пустая строка)
-            "\mg15\customform\Main",
-            // метод класса выполняющий обработку (для callback-обработчика, если файловый - пустая строка)
-            'get'
-        );
-
-        // для работы с ORM, есть три типа событий: onBefore<Action> - перед вызовом запроса (можно изменить входные параметры), после следуют валидаторы. on<Action> - уже нельзя изменить входные параметры, после выполняется SQL-запрос. onAfter<Action> - после выполнения операции, операция уже совершена
-        // три события <Action> итого 9 событий: Add, Update, Delete
-        EventManager::getInstance()->registerEventHandler(
-            // идентификатор модуля, для которого регистрируется событие
-            $this->MODULE_ID,
-            // тип события, класс называется DataTable, но должно передаваться по имени файла, то есть просто Data
-            "\mg15\customform\Data::OnBeforeUpdate",
-            // идентификатор модуля к которому относится регистрируемый обработчик, из какого модуля берется класс, нужно если необходимо связать 2 модуля, если используем один, то дублируем поле с первым
-            $this->MODULE_ID,
-            // класс обработчика
-            "\mg15\customform\Events",
-            // метод обработчика
-            'eventHandler'
-        );
-
-        // для успешного завершения, метод должен вернуть true
-        return true;
-    }
-
-    // метод для удаления обработчика событий
-    function UnInstallEvents()
-    {
-        // удаление событий, аналогично установке
-        EventManager::getInstance()->unRegisterEventHandler(
-            $this->MODULE_ID,
-            "OnSomeEvent",
-            $this->MODULE_ID,
-            "\mg15\customform\Main",
-            'get'
-        );
-
-        // удаление событий, аналогично установке
-        EventManager::getInstance()->unRegisterEventHandler(
-            $this->MODULE_ID,
-            "\mg15\customform\Data::OnBeforeUpdate",
-            $this->MODULE_ID,
-            "\mg15\customform\Events",
-            'eventHandler'
-        );
-
-        // для успешного завершения, метод должен вернуть true
         return true;
     }
 
@@ -343,8 +177,6 @@ class Mg15_Customform extends CModule
             true, // перезаписывает файлы
             true  // копирует рекурсивно
         );
-
-        // для успешного завершения, метод должен вернуть true
         return true;
     }
 
@@ -370,8 +202,6 @@ class Mg15_Customform extends CModule
             __DIR__ . "/files",
             $_SERVER["DOCUMENT_ROOT"] . "/"
         );
-
-        // для успешного завершения, метод должен вернуть true
         return true;
     }
 
@@ -406,34 +236,5 @@ class Mg15_Customform extends CModule
 
         // для успешного завершения, метод должен вернуть true
         return true;
-    }
-
-    // установка агентов
-    function installAgents()
-    {
-        \CAgent::AddAgent(
-            // строка PHP для запуска агента-функции
-            "\mg15\customform\Agent::superAgent();",
-            // идентификатор модуля, необходим для подключения файлов модуля (необязательный) 
-            $this->MODULE_ID,
-            // период, нужен для агентов, которые должны выполняться точно в срок. Если агент пропустил запуск, то он сделает его столько раз, сколько он пропустил. Если значение N, то агент после первого запуска будет запускаться с заданным интервалам (необязательный, по умолчанию N)                   
-            "N",
-            // интервал в секундах (необязательный, по умолчанию 86400 (сутки))                                
-            120,
-            // дата первой проверки (необязательный, по умолчанию текущее время)
-            "",
-            // активность агента (необязательный, по умолчанию Y) 
-            "Y",
-            // дата первого запуска (необязательный, по умолчанию текущее время)
-            "",
-            // сортировка (влияет на порядок выполнения агентов (очередность), для тех, которые запускаются в одно время) (необязательный, по умолчанию 100)  
-            100
-        );
-    }
-
-    // удаление агентов
-    function unInstallAgents()
-    {
-        \CAgent::RemoveModuleAgents($this->MODULE_ID);
     }
 }

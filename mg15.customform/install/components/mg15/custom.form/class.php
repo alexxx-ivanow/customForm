@@ -3,7 +3,7 @@ use Bitrix\Main\Application,
     Bitrix\Main\HttpResponse,
     Bitrix\Main\Localization\Loc,
     //Bitrix\Main\Context, 
-    Bitrix\Main\Request, 
+    Bitrix\Main\Request,
     Bitrix\Main\Mail\Event;
 
 if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true) die();
@@ -18,7 +18,7 @@ class CustomFormComponent extends CBitrixComponent
         $this->arResult['MESSAGE'] = [];
         $this->arResult['ERRORS'] = [];
         $this->arResult['EXCLUDE'] = [];
-        $this->arResult['IS_COMMENT'] = false;      
+        $this->arResult['IS_COMMENT'] = false;
 
         foreach($this->arParams['FIELDS'] as $key => $field) {
             if($field === 'COMMENT') { // если есть поле комментария
@@ -30,12 +30,18 @@ class CustomFormComponent extends CBitrixComponent
         if($this->request->isAjaxRequest()) {            
             $this->manageRequest();
         }
-        
+
         $this->IncludeComponentTemplate();
     }
 
     private function manageRequest()
     {
+        // антибот
+        $botField = $this->request->getPost('bot_field');
+        if(isset($botField) && !empty($botField)){
+            $this->arResult['ERRORS'][] = Loc::getMessage('error_bot_field');
+        }
+
         //валидируем на пустоту и корректность
         foreach($this->arParams['FIELDS'] as $key => $field) {
             if(!$this->request->getPost('CF_' . $field) && in_array($field, $this->arParams['REQUIRED'])) { // проверка поля на обязательность
@@ -80,14 +86,11 @@ class CustomFormComponent extends CBitrixComponent
 
     private function sendEmail()
     {
-        //if($this->arParams['EVENT_NAME']) {
-            Event::send([
-                //"EVENT_NAME" => $this->arParams['EVENT_NAME'],
-                "EVENT_NAME" => 'MG15_CUSTOM_FORM_FILLING',
-                "LID" => SITE_ID,
-                "C_FIELDS" => $this->fields,
-            ]);
-        //}       
+        Event::send([
+            "EVENT_NAME" => 'MG15_CUSTOM_FORM_FILLING',
+            "LID" => SITE_ID,
+            "C_FIELDS" => $this->fields,
+        ]);
     }
 
     private function writeToIblock()

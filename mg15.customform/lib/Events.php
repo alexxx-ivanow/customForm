@@ -17,7 +17,7 @@ class Events
     {
         $eventTypes = [
             [
-                'EVENT_NAME' => Loc::getMessage('EVENT_NAME'),
+                'EVENT_NAME' => 'MG15_CUSTOM_FORM_FILLING',
                 'NAME' => Loc::getMessage('MG15_CUSTOM_FORM_FILLING_NAME'),
                 'DESCRIPTION' => Loc::getMessage('MG15_CUSTOM_FORM_FILLING_DESC'),      
                 'LID' => SITE_ID,
@@ -59,7 +59,7 @@ class Events
         $templates = [
             [
                 "ACTIVE"      => "Y",
-                "EVENT_NAME"  => Loc::getMessage('EVENT_NAME'),
+                "EVENT_NAME"  => 'MG15_CUSTOM_FORM_FILLING',
                 "LID"         => $lids,
                 "EMAIL_FROM"  => "#DEFAULT_EMAIL_FROM#",
                 "EMAIL_TO"    => "#DEFAULT_EMAIL_FROM#",
