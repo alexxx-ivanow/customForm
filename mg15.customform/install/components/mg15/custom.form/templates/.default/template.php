@@ -8,11 +8,13 @@ if($arParams['IS_BOOTSTRAP'] === 'Y')
 ?>
 
 <form method="post" class="custom_form jsCustomFrom" action="<?=$APPLICATION->GetCurPage()?>">
-    <input type="hidden" name="bot_field" value="">
+    <?if($arParams['IS_ANTISPAM'] === 'Y'):?>
+        <input type="hidden" name="bot_field" value="<?=$arResult['BOT_CODE']?>">
+    <?endif;?>
 
     <?foreach($arParams['FIELDS'] as $key => $field):?>
         <?if(in_array($field, $arResult['EXCLUDE'])) continue;?>
-        <div class="form-group mb-3">
+        <div class="mb-3">
             <label class="form-label">
                 <span class="form_caption"><?=Loc::getMessage('CF_' . $field . '_CAPTION')?></span>
                 <input type="text" class="form_input form-control" name="CF_<?=$field?>">
@@ -21,7 +23,7 @@ if($arParams['IS_BOOTSTRAP'] === 'Y')
     <?endforeach;?>
 
     <?if($arResult['IS_COMMENT']):?>
-        <div class="form-group mb-3">
+        <div class="mb-3">
             <label class="form-label">
                 <span class="form_caption"><?=Loc::getMessage('CF_COMMENT_CAPTION')?></span>
                 <textarea type="tel" class="form_input form-control" name="CF_COMMENT"></textarea>
