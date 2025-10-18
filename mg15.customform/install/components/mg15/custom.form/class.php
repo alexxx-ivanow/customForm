@@ -13,10 +13,12 @@ class CustomFormComponent extends CBitrixComponent
 {
 
     private $fields = [];
+    private static $fieldPrefix = 'CF_';
     private static $eventName = 'MG15_CUSTOM_FORM_FILLING';
 
     public function executeComponent()
     {
+        $this->arResult['FIELD_PREFIX'] = self::$fieldPrefix;
         $this->arResult['MESSAGE'] = [];
         $this->arResult['ERRORS'] = [];
         $this->arResult['EXCLUDE'] = [];
@@ -41,25 +43,24 @@ class CustomFormComponent extends CBitrixComponent
     {
         // антибот
         if($this->arParams['IS_ANTISPAM'] === 'Y') {
-            //$this->checkBots();
-            if(!AntiSpam::checkBots($this->request->getPost('bot_field'))) {
-                $this->arResult['ERRORS'][] = Loc::getMessage('error_bot_field');
+            if(!AntiSpam::checkBots($this->request->getPost(self::$fieldPrefix . 'B_FIELD'))) {
+                $this->arResult['ERRORS']['B_FIELD'] = Loc::getMessage('error_bot_field');
             }
         }
 
-
         //валидируем на пустоту и корректность
-        foreach($this->arParams['FIELDS'] as $key => $field) {
-            if(!$this->request->getPost('CF_' . $field) && in_array($field, $this->arParams['REQUIRED'])) { // проверка поля на обязательность
-                $this->arResult['ERRORS'][] = Loc::getMessage('form_required_field', ['FIELD' => $field]);
-            } elseif($this->request->getPost('CF_' . $field)) { // валидация заполненного поля
+        foreach($this->arParams['FIELDS'] as $field) {
+            if(!$this->request->getPost(self::$fieldPrefix . $field) && in_array($field, $this->arParams['REQUIRED'])) { // проверка
+                // поля на обязательность
+                $this->arResult['ERRORS'][$field] = Loc::getMessage('form_required_field', ['FIELD' => $field]);
+            } elseif($this->request->getPost(self::$fieldPrefix . $field)) { // валидация заполненного поля
                 $this->validateField($field);
             }
         }
 
         // чекбокс согласия
         if($this->arParams['IS_AGREE'] === 'Y') {
-            $this->validateAgree($this->request->getPost('CF_AGREE'));
+            $this->validateAgree($this->request->getPost(self::$fieldPrefix . 'AGREE'));
         }
 
         if(!count($this->arResult['ERRORS'])) { // если нет ошибок
@@ -76,31 +77,6 @@ class CustomFormComponent extends CBitrixComponent
 
         $this->sendJsonResponse($this->arResult);
     }
-
-    /*public static function getBotValue()
-    {
-        if(
-            !isset($_SESSION['data-register']) ||
-            !$_SESSION['data-register']
-        ) {
-            $_SESSION['data-register'] = md5(microtime());
-        }
-
-        return $_SESSION['data-register'];
-    }
-
-    private function checkBots()
-    {
-        $botField = $this->request->getPost('bot_field');
-        if(
-            empty($botField) ||
-            (isset($botField)
-                && !empty($botField)
-                && $botField !== self::getBotValue())
-        ){
-            $this->arResult['ERRORS'][] = Loc::getMessage('error_bot_field');
-        }
-    }*/
 
     private function sendJsonResponse($data)
     {
@@ -132,6 +108,7 @@ class CustomFormComponent extends CBitrixComponent
 
     private function writeToIblock()
     {
+        Loader::includeModule('iblock');
         $el = new CIBlockElement;
         $arLoadProductArray = [
             "IBLOCK_SECTION_ID" => false, // элемент лежит в корне раздела
@@ -141,32 +118,32 @@ class CustomFormComponent extends CBitrixComponent
             "PREVIEW_TEXT"   => 'ФИО: ' . $this->fields['NAME'] . PHP_EOL . 'Email: ' . $this->fields['EMAIL'] . PHP_EOL . 'Телефон: ' . $this->fields['PHONE'] . PHP_EOL . 'Комментарий: ' . $this->fields['COMMENT'],
         ];
         if(!$PRODUCT_ID = $el->Add($arLoadProductArray)) {
-            $this->arResult['ERRORS'][] = Loc::getMessage('form_iblock_add_error');
+            $this->arResult['ERRORS']['IBLOCK'] = Loc::getMessage('form_iblock_add_error');
         }
     }
 
     private function validateField($field)
     {
         if($field === 'NAME') {
-            $this->fields['NAME'] = htmlspecialchars(strip_tags($this->request->getPost('CF_NAME')));
+            $this->fields['NAME'] = htmlspecialchars(strip_tags($this->request->getPost(self::$fieldPrefix . 'NAME')));
         }
         if($field === 'EMAIL') {
-            $this->fields['EMAIL'] = $this->request->getPost('CF_EMAIL');
+            $this->fields['EMAIL'] = $this->request->getPost(self::$fieldPrefix . 'EMAIL');
             $this->validateEmail($this->fields['EMAIL']);
         }
         if($field === 'PHONE') {
-            $this->fields['PHONE'] = $this->request->getPost('CF_PHONE');
+            $this->fields['PHONE'] = $this->request->getPost(self::$fieldPrefix . 'PHONE');
             $this->validatePhone($this->fields['PHONE']);
         }
         if($field === 'COMMENT') {
-            $this->fields['COMMENT'] = strip_tags($this->request->getPost('CF_COMMENT'));
+            $this->fields['COMMENT'] = strip_tags($this->request->getPost(self::$fieldPrefix . 'COMMENT'));
         }
     }
 
-    private function validateAgree(string $agree = '')
+    private function validateAgree($agree = null)
     {
-        if ($agree !== 'Y'){
-            $this->arResult['ERRORS'][] = Loc::getMessage('validate_agree_error');
+        if (!$agree || $agree !== 'Y'){
+            $this->arResult['ERRORS']['AGREE'] = Loc::getMessage('validate_agree_error');
             return false;
         }
         return true;
@@ -175,7 +152,7 @@ class CustomFormComponent extends CBitrixComponent
     private function validateEmail(string $email = '')
     {
         if (!preg_match("/^(?:[a-z0-9_+.-]{3,64}+@[a-z0-9_.-]{2,59}.[a-z]{2,5})$/i", $email)){
-            $this->arResult['ERRORS'][] = Loc::getMessage('validate_email_error');
+            $this->arResult['ERRORS']['EMAIL'] = Loc::getMessage('validate_email_error');
             return false;
         }
         return true;
@@ -184,7 +161,7 @@ class CustomFormComponent extends CBitrixComponent
     private function validatePhone(string $phone = '')
     {
         if (!preg_match('/((8|\+7)-?)?\(?\d{3,5}\)?-?\d{1}-?\d{1}-?\d{1}-?\d{1}-?\d{1}((-?\d{1})?-?\d{1})?/', $this->clearCharPhone($phone))){
-            $this->arResult['ERRORS'][] = Loc::getMessage('validate_phone_error');
+            $this->arResult['ERRORS']['PHONE'] = Loc::getMessage('validate_phone_error');
             return false;
         }
         return true;

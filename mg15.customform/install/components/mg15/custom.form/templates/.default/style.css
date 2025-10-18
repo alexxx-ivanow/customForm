@@ -14,8 +14,13 @@
     margin: 4px 0 4px;
 }
 
-.custom_result_error {
+.custom_result_error,
+.CF_form_error.form-text {
     color: red;
+}
+.form_input.error,
+input[type=checkbox].error {
+    border-color:red;
 }
 
 .custom_result_success {

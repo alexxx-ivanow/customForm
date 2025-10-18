@@ -1,55 +1,99 @@
-document.addEventListener('DOMContentLoaded', function(){
-    let forms = document.querySelectorAll('.jsCustomFrom');
+let custom_form = {
+    prefix: "CF_",
+    getForms() {
+        return document.querySelectorAll('.jsCustomForm');
+    },
+    getFormField(key) {
+        return document.querySelector('.' + this.prefix + key + '_error');
+    },
+    getFormInput(key) {
+        return document.querySelector('input[name=' + this.prefix + key);
+    },
+    getResultWrap(form) {
+        return form.querySelector('.jsCustomResult');
+    },
+    setSuccessNotification(response, result) {
+        let success = response;
+        let successHtml = '';
+        success.forEach(function (item, i){
+            successHtml += '<p>' + item + '</p>';
+        });
+        result.innerHTML = '<div class="custom_result_success">' + successHtml + '</div>';
+    },
+    clearSpanErrors() {
+        let span_errors = document.querySelectorAll('.' + custom_form.prefix + 'form_error');
+        span_errors.forEach(function(item) {
+            item.innerHTML = "";
+        });
+    },
+    clearInputErrors() {
+        let form_inputs = document.querySelectorAll('.jsCustomForm input');
+        form_inputs.forEach(function(item) {
+            item.classList.remove('error');
+        });
+    },
+    clearForm(form) {
+        let inputs = form.querySelectorAll('input:not([type=hidden]):not([type=checkbox]), textarea');
+        inputs.forEach(function (current) {
+            current.value = '';
+        });
 
-    forms.forEach(function (currentValue, currentIndex, listObj) {              
+        let checkbox = form.querySelectorAll('input[type=checkbox]');
+        checkbox.forEach(function (current) {
+            current.checked = false;
+        });
+    }
+};
+
+document.addEventListener('DOMContentLoaded', function(){
+    let forms = custom_form.getForms();
+
+    forms.forEach(function (currentValue, currentIndex, listObj) {
         currentValue.onsubmit = async (e) => {
             e.preventDefault();
-            
+
             let formData = new FormData(currentValue);
-            let result = currentValue.querySelector('.jsCustomResult');            
+            let result = custom_form.getResultWrap(currentValue);
 
             var httpRequest = new XMLHttpRequest();
             httpRequest.responseType = "json";
-            
+
             httpRequest.open('POST', currentValue.getAttribute('action'));
             httpRequest.setRequestHeader('X-Requested-With', 'XMLHttpRequest'); // без него bitrix не принимает через isAjaxRequest
             httpRequest.responseType = "json";
 
             httpRequest.onreadystatechange = function(){
                 if ( this.readyState == 4 && this.status == 200 ) {
-                    //console.log(this.response);
                     result.innerHTML = "";
-                    if(this.response.ERRORS.length){
+
+                    custom_form.clearSpanErrors();
+                    custom_form.clearInputErrors();
+
+                    if (Object.keys(this.response.ERRORS).length !== 0) {
                         let error = this.response.ERRORS;
-                        let errorHtml = '';
-                        error.forEach(function (item, i){
-                            errorHtml += '<p>' + item + '</p>';
-                        });
-                        result.innerHTML = '<div class="custom_result_error">' + errorHtml + '</div>';
+                        console.log(error);
+                        for (var key in error) {
+                            let field = custom_form.getFormField(key);
+                            let input = custom_form.getFormInput(key);
+                            if(field || input) {
+                                if(field) {
+                                    field.innerHTML = error[key];
+                                }
+                                if(input) {
+                                    input.classList.add('error');
+                                }
+                            } else {
+                                console.log(field);
+                            }
+                        }
                     } else {
-                        clearForm(currentValue);                                     
-                        let success = this.response.MESSAGE;
-                        let successHtml = '';
-                        success.forEach(function (item, i){
-                            successHtml += '<p>' + item + '</p>';
-                        });
-                        result.innerHTML = '<div class="custom_result_success">' + successHtml + '</div>';
-                    }            
+                        custom_form.clearForm(currentValue);
+                        custom_form.setSuccessNotification(this.response.MESSAGE, result);
+
+                    }
                 }
             };
             httpRequest.send(formData);
-        };        
+        };
     });
 });
-
-function clearForm(form) { 
-    let inputs = form.querySelectorAll('input:not([type=checkbox]), textarea');
-    inputs.forEach(function (current) {
-        current.value = '';
-    });
-
-    let checkbox = form.querySelectorAll('input[type=checkbox]');
-    checkbox.forEach(function (current) {
-        current.checked = false;
-    });
-}
