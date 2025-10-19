@@ -3,11 +3,11 @@ let custom_form = {
     getForms() {
         return document.querySelectorAll('.jsCustomForm');
     },
-    getFormField(key) {
-        return document.querySelector('.' + this.prefix + key + '_error');
+    getFormField(key, form) {
+        return form.querySelector('.' + this.prefix + key + '_error');
     },
-    getFormInput(key) {
-        return document.querySelector('[name=' + this.prefix + key);
+    getFormInput(key, form) {
+        return form.querySelector('[name=' + this.prefix + key);
     },
     getResultWrap(form) {
         return form.querySelector('.jsCustomResult');
@@ -20,14 +20,14 @@ let custom_form = {
         });
         result.innerHTML = '<div class="custom_result_success">' + successHtml + '</div>';
     },
-    clearSpanErrors() {
-        let span_errors = document.querySelectorAll('.' + custom_form.prefix + 'form_error');
+    clearSpanErrors(form) {
+        let span_errors = form.querySelectorAll('.' + custom_form.prefix + 'form_error');
         span_errors.forEach(function(item) {
             item.innerHTML = "";
         });
     },
-    clearInputErrors() {
-        let form_inputs = document.querySelectorAll('.jsCustomForm input, .jsCustomForm textarea');
+    clearInputErrors(form) {
+        let form_inputs = form.querySelectorAll('.jsCustomForm input, .jsCustomForm textarea');
         form_inputs.forEach(function(item) {
             item.classList.remove('error');
         });
@@ -66,17 +66,17 @@ document.addEventListener('DOMContentLoaded', function(){
                 if ( this.readyState == 4 && this.status == 200 ) {
                     result.innerHTML = "";
 
-                    custom_form.clearSpanErrors();
-                    custom_form.clearInputErrors();
+                    custom_form.clearSpanErrors(currentValue);
+                    custom_form.clearInputErrors(currentValue);
 
-                    console.log(this.response);
+                    //console.log(this.response);
 
                     if (Object.keys(this.response.ERRORS).length !== 0) {
                         let error = this.response.ERRORS;
-                        console.log(error);
+                        //console.log(error);
                         for (var key in error) {
-                            let field = custom_form.getFormField(key);
-                            let input = custom_form.getFormInput(key);
+                            let field = custom_form.getFormField(key, currentValue);
+                            let input = custom_form.getFormInput(key, currentValue);
                             if(field || input) {
                                 if(field) {
                                     field.innerHTML = error[key];
@@ -94,11 +94,10 @@ document.addEventListener('DOMContentLoaded', function(){
 
                     }
                 }/* else {
-                    console.error("Error:", httpRequest.statusText);
+                    console.log("Error:", this.status);
                 }*/
             };
             httpRequest.send(formData);
         };
     });
 });
-
