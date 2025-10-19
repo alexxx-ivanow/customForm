@@ -1,14 +1,15 @@
 <?
 use Bitrix\Main\Mail\Internal\EventTypeTable,
     Bitrix\Iblock\IblockTable,
-    Bitrix\Iblock\TypeTable;
+    Bitrix\Iblock\TypeTable,
+    Bitrix\Main\Web\Json;
 
 if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true) die();
 
 if(!CModule::IncludeModule("iblock"))
     return;
 
-//$arTypesEx = CIBlockParameters::GetIBlockTypes(["-" => " "]);
+CBitrixComponent::includeComponentClass('bitrix:catalog.element');
 
 // типы инфоблоков
 $types = TypeTable::getList([
@@ -90,6 +91,12 @@ $arComponentParameters = [
             "ADDITIONAL_VALUES" => "Y",
             "REFRESH" => "Y",
         ],
+        "FORM_TITLE" => [
+            "PARENT" => "FIELDS",
+            "NAME" => 'Название формы',
+            "TYPE" => "STRING",
+            "DEFAULT" => "",
+        ],
         "FIELDS" => [
             "PARENT" => "FIELDS",
             "NAME" => "Список полей для формы",
@@ -102,14 +109,14 @@ $arComponentParameters = [
                 "PHONE" => "Телефон",
                 "COMMENT" => "Комментарий",
             ],
-            //"ADDITIONAL_VALUES" => "Y",
+            "ADDITIONAL_VALUES" => "Y",
         ],
         "REQUIRED" => [
             "PARENT" => "FIELDS",
             "NAME" => "Обязательные поля",
             "TYPE" => "LIST",
             "MULTIPLE" => "Y",
-            "SIZE" => "4",
+            "SIZE" => "5",
             "VALUES" => [
                 "NAME" => "ФИО",
                 "EMAIL" => "E-mail",
@@ -117,10 +124,36 @@ $arComponentParameters = [
                 "COMMENT" => "Комментарий",
             ],
             "DEFAULT" => "",
+            "ADDITIONAL_VALUES" => "Y",
+        ],
+        "FIELDS_ORDER" => [
+            'PARENT' => 'FIELDS',
+            'NAME' => 'Сортировка полей',
+            'TYPE' => 'CUSTOM',
+            'JS_FILE' => CatalogElementComponent::getSettingsScript('/local/components/mg15/custom.form', 'dragdrop_order'),
+            'JS_EVENT' => 'initDraggableOrderControl',
+            'JS_DATA' => Json::encode([
+                "NAME" => "ФИО",
+                "EMAIL" => "E-mail",
+                "PHONE" => "Телефон",
+            ]),
+            "DEFAULT" => "NAME,EMAIL,PHONE",
+        ],
+        "IS_PHONE_MASK" => [
+            "PARENT" => "FIELDS",
+            "NAME" => 'Включить маску для поля телефона',
+            "TYPE" => "CHECKBOX",
+            "DEFAULT" => "Y",
+        ],
+        "IS_POLITICS" => [
+            "PARENT" => "FIELDS",
+            "NAME" => 'Добавить чекбокс согласия с политикой конфиденциальности',
+            "TYPE" => "CHECKBOX",
+            "DEFAULT" => "Y",
         ],
         "IS_AGREE" => [
             "PARENT" => "FIELDS",
-            "NAME" => 'Добавить чекбокс согласия',
+            "NAME" => 'Добавить чекбокс согласия с обработкой персональных данных',
             "TYPE" => "CHECKBOX",
             "DEFAULT" => "Y",
         ],
@@ -141,16 +174,6 @@ $arComponentParameters = [
             "NAME" => 'Отправлять письмо',
             "TYPE" => "CHECKBOX",
             "DEFAULT" => "Y",
-            //"REFRESH" => "Y",
         ],
-        /*"EVENT_NAME" => [
-            "PARENT" => "ADDITIONAL",
-            "NAME" => "Почтовое событие",
-            "HIDDEN" => $arCurrentValues['IS_SEND_EMAIL'] === "Y" ? "N" : "Y",
-            "TYPE" => "LIST",
-            "DEFAULT" => "",
-            "VALUES" => $resultEventsList,
-            "COLS" => "50",
-        ],*/
     ],
 ];

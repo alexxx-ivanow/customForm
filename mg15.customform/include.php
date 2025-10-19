@@ -5,5 +5,6 @@ Bitrix\Main\Loader::registerAutoloadClasses(
 	[
 		//"mg15\\customform\\Events" => "lib/Events.php",
 		"mg15\\customform\\AntiSpam" => "lib/AntiSpam.php",
+		"mg15\\customform\\Validate" => "lib/validators/Validate.php",
 	]
 );

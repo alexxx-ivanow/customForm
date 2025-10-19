@@ -1,8 +1,10 @@
 <?php
 use Bitrix\Main\HttpResponse,
+    Bitrix\Main\Page\Asset,
     Bitrix\Main\Localization\Loc,
     Bitrix\Main\Mail\Internal\EventTypeTable,
     mg15\customform\AntiSpam,
+    mg15\customform\Validate,
     Bitrix\Main\Loader,
     Bitrix\Main\Mail\Event;
 
@@ -13,6 +15,9 @@ class CustomFormComponent extends CBitrixComponent
 {
 
     private $fields = [];
+
+    public $post = [];
+
     private static $fieldPrefix = 'CF_';
     private static $eventName = 'MG15_CUSTOM_FORM_FILLING';
 
@@ -21,17 +26,72 @@ class CustomFormComponent extends CBitrixComponent
         $this->arResult['FIELD_PREFIX'] = self::$fieldPrefix;
         $this->arResult['MESSAGE'] = [];
         $this->arResult['ERRORS'] = [];
+        $this->arResult['ALIASES'] = [];
         $this->arResult['EXCLUDE'] = [];
         $this->arResult['BOT_CODE'] = ($this->arParams['IS_ANTISPAM'] === 'Y') ? AntiSpam::getBotValue() : '';
         $this->arResult['IS_COMMENT'] = false;
 
+        // включение маски телефона
+        if($this->arParams['IS_PHONE_MASK'] === 'Y') {
+            Asset::getInstance()->addJs($this->getPath() . '/lib/js/mask_phone.js');
+        }
+
+        // поключаем Bootstrap
+        if($this->arParams['IS_BOOTSTRAP'] === 'Y')
+            Asset::getInstance()->addCss($this->getPath() . '/lib/css/bootstrap.css');
+
+        // предварительная санация входящих данных формы
+        foreach ($this->request->getPostList()->toArray() as $key => $row) {
+            $this->post[$key] = strip_tags(htmlspecialchars($row));
+        }
+
+        // обрабатываем значения параметров
         foreach($this->arParams['FIELDS'] as $key => $field) {
-            if($field === 'COMMENT') { // если есть поле комментария
+
+            // определяем названия полей (либо из параметра, лмбо из ланговых файлов)
+            if(strpos($field, '==') !== false) {
+                $tmpSplit = explode('==', $field);
+                $this->arResult['ALIASES'][$tmpSplit[0]] = $tmpSplit[1];
+                $this->arParams['FIELDS'][$key] = $tmpSplit[0];
+            } else {
+                $this->arResult['ALIASES'][$field] = Loc::getMessage(self::$fieldPrefix . $field . '_CAPTION');
+            }
+
+            // если в параметрах задано поле комментария
+            if($field === 'COMMENT') {
                 $this->arResult['IS_COMMENT'] = true;
                 $this->arResult['EXCLUDE'][] = 'COMMENT';
             }
+
+            // убираем пустые значения
+            if(!$field) {
+                unset($this->arParams['FIELDS'][$key]);
+            } else { // если не пустое - добавляем в свойство $this->fields
+                $this->fields[$this->arParams['FIELDS'][$key]] = $this->post[self::$fieldPrefix . $this->arParams['FIELDS'][$key]];
+            }
         }
 
+        // убираем пустые значения в массиве обязательных полей REQUIRED из-за доп полей в параметрах
+        foreach($this->arParams['REQUIRED'] as $key => $field) {
+            if(!$field) {
+                unset($this->arParams['REQUIRED'][$key]);
+            }
+        }
+
+        // сортируем основные поля по параметру FIELDS_ORDER
+        $orderFieldsArr = explode(',', $this->arParams['FIELDS_ORDER']);
+        $orderFieldsArrReverse = array_reverse($orderFieldsArr);
+        foreach($orderFieldsArrReverse as $key => $field) {
+            if(!in_array($field, $this->arParams['FIELDS'])) {
+                unset($orderFieldsArrReverse[$key]);
+            }
+        }
+        foreach($orderFieldsArrReverse as $field) {
+            unset($this->arParams['FIELDS'][array_search($field, $this->arParams['FIELDS'])]);
+            array_unshift($this->arParams['FIELDS'], $field);
+        }
+
+        // если приходит ajax-запрос
         if($this->request->isAjaxRequest()) {
             $this->manageRequest();
         }
@@ -43,37 +103,48 @@ class CustomFormComponent extends CBitrixComponent
     {
         // антибот
         if($this->arParams['IS_ANTISPAM'] === 'Y') {
-            if(!AntiSpam::checkBots($this->request->getPost(self::$fieldPrefix . 'B_FIELD'))) {
-                $this->arResult['ERRORS']['B_FIELD'] = Loc::getMessage('error_bot_field');
+            if(!AntiSpam::checkBots($this->post[self::$fieldPrefix . 'B_FIELD'])) {
+                $this->arResult['ERRORS']['B_FIELD'] = Loc::getMessage('ERROR_BOT_FIELD');
             }
         }
 
-        //валидируем на пустоту и корректность
-        foreach($this->arParams['FIELDS'] as $field) {
-            if(!$this->request->getPost(self::$fieldPrefix . $field) && in_array($field, $this->arParams['REQUIRED'])) { // проверка
-                // поля на обязательность
-                $this->arResult['ERRORS'][$field] = Loc::getMessage('form_required_field', ['FIELD' => $field]);
-            } elseif($this->request->getPost(self::$fieldPrefix . $field)) { // валидация заполненного поля
-                $this->validateField($field);
-            }
+        // если включен чекбокс согласия с политикой конфиденциальности
+        if($this->arParams['IS_POLITICS'] === 'Y') {
+            $this->arParams['FIELDS'][] = 'POLITICS';
         }
 
-        // чекбокс согласия
+        // если включен чекбокс согласия с обработкой персональных данных
         if($this->arParams['IS_AGREE'] === 'Y') {
-            $this->validateAgree($this->request->getPost(self::$fieldPrefix . 'AGREE'));
+            $this->arParams['FIELDS'][] = 'AGREE';
+        }
+
+        //валидируем поля формы на пустоту и корректность
+        foreach($this->arParams['FIELDS'] as $field) {
+            // проверка поля на обязательность
+            if(in_array($field, $this->arParams['REQUIRED']) && !$this->post[self::$fieldPrefix . $field]) {
+                $this->arResult['ERRORS'][$field] = Loc::getMessage('FORM_REQUIRED_FIELD', ['FIELD' =>
+                    $this->arResult['ALIASES'][$field]]);
+            } else { // валидация заполненного поля
+                if(Validate::validateField($field, $this->post[self::$fieldPrefix . $field]) === false) {
+                    $this->arResult['ERRORS'][$field] = Loc::getMessage('ERROR_VALIDATE_FIELD_' . $field);
+                }
+            }
         }
 
         if(!count($this->arResult['ERRORS'])) { // если нет ошибок
             if($this->arParams['IS_SEND_EMAIL'] === 'Y') {
-                $this->sendEmail();
+                $this->sendEmail(); // отправляем Email
             }
 
             if((int)$this->arParams['IBLOCK_ID']) {
-                $this->writeToIblock();
+                $this->writeToIblock(); // делаем запись в инфоблок
             }
 
-            $this->arResult['MESSAGE'][] = Loc::getMessage('form_message_success');
+            $this->arResult['MESSAGE'][] = Loc::getMessage('FORM_MESSAGE_SUCCESS');
         }
+
+        $this->arResult['POST'] = $this->post;
+        //$this->arResult['FIELDS_AFTER'] = $this->fields;
 
         $this->sendJsonResponse($this->arResult);
     }
@@ -110,65 +181,22 @@ class CustomFormComponent extends CBitrixComponent
     {
         Loader::includeModule('iblock');
         $el = new CIBlockElement;
+
+        $messageArr = [];
+        foreach($this->fields as $key => $field) {
+            $messageArr[] = $this->arResult['ALIASES'][$key] . ': ' . $field;
+        }
+
         $arLoadProductArray = [
             "IBLOCK_SECTION_ID" => false, // элемент лежит в корне раздела
             "IBLOCK_ID"      => $this->arParams['IBLOCK_ID'],
             "NAME"           => "Форма заполнена " . date('Y-m-d H:i:s'),
             "ACTIVE"         => "N",
-            "PREVIEW_TEXT"   => 'ФИО: ' . $this->fields['NAME'] . PHP_EOL . 'Email: ' . $this->fields['EMAIL'] . PHP_EOL . 'Телефон: ' . $this->fields['PHONE'] . PHP_EOL . 'Комментарий: ' . $this->fields['COMMENT'],
+
+            "PREVIEW_TEXT"   => implode(PHP_EOL, $messageArr),
         ];
-        if(!$PRODUCT_ID = $el->Add($arLoadProductArray)) {
-            $this->arResult['ERRORS']['IBLOCK'] = Loc::getMessage('form_iblock_add_error');
+        if(!$el->Add($arLoadProductArray)) {
+            $this->arResult['ERRORS']['IBLOCK'] = Loc::getMessage('FORM_IBLOCK_ADD_ERROR');
         }
     }
-
-    private function validateField($field)
-    {
-        if($field === 'NAME') {
-            $this->fields['NAME'] = htmlspecialchars(strip_tags($this->request->getPost(self::$fieldPrefix . 'NAME')));
-        }
-        if($field === 'EMAIL') {
-            $this->fields['EMAIL'] = $this->request->getPost(self::$fieldPrefix . 'EMAIL');
-            $this->validateEmail($this->fields['EMAIL']);
-        }
-        if($field === 'PHONE') {
-            $this->fields['PHONE'] = $this->request->getPost(self::$fieldPrefix . 'PHONE');
-            $this->validatePhone($this->fields['PHONE']);
-        }
-        if($field === 'COMMENT') {
-            $this->fields['COMMENT'] = strip_tags($this->request->getPost(self::$fieldPrefix . 'COMMENT'));
-        }
-    }
-
-    private function validateAgree($agree = null)
-    {
-        if (!$agree || $agree !== 'Y'){
-            $this->arResult['ERRORS']['AGREE'] = Loc::getMessage('validate_agree_error');
-            return false;
-        }
-        return true;
-    }
-
-    private function validateEmail(string $email = '')
-    {
-        if (!preg_match("/^(?:[a-z0-9_+.-]{3,64}+@[a-z0-9_.-]{2,59}.[a-z]{2,5})$/i", $email)){
-            $this->arResult['ERRORS']['EMAIL'] = Loc::getMessage('validate_email_error');
-            return false;
-        }
-        return true;
-    }
-
-    private function validatePhone(string $phone = '')
-    {
-        if (!preg_match('/((8|\+7)-?)?\(?\d{3,5}\)?-?\d{1}-?\d{1}-?\d{1}-?\d{1}-?\d{1}((-?\d{1})?-?\d{1})?/', $this->clearCharPhone($phone))){
-            $this->arResult['ERRORS']['PHONE'] = Loc::getMessage('validate_phone_error');
-            return false;
-        }
-        return true;
-    }
-
-    private function clearCharPhone($phone){
-        return preg_replace('/[\(\) -]/', '', trim($phone));
-    }
-
 }

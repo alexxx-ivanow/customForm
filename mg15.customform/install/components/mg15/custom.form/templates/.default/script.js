@@ -7,7 +7,7 @@ let custom_form = {
         return document.querySelector('.' + this.prefix + key + '_error');
     },
     getFormInput(key) {
-        return document.querySelector('input[name=' + this.prefix + key);
+        return document.querySelector('[name=' + this.prefix + key);
     },
     getResultWrap(form) {
         return form.querySelector('.jsCustomResult');
@@ -27,7 +27,7 @@ let custom_form = {
         });
     },
     clearInputErrors() {
-        let form_inputs = document.querySelectorAll('.jsCustomForm input');
+        let form_inputs = document.querySelectorAll('.jsCustomForm input, .jsCustomForm textarea');
         form_inputs.forEach(function(item) {
             item.classList.remove('error');
         });
@@ -69,6 +69,8 @@ document.addEventListener('DOMContentLoaded', function(){
                     custom_form.clearSpanErrors();
                     custom_form.clearInputErrors();
 
+                    console.log(this.response);
+
                     if (Object.keys(this.response.ERRORS).length !== 0) {
                         let error = this.response.ERRORS;
                         console.log(error);
@@ -91,9 +93,12 @@ document.addEventListener('DOMContentLoaded', function(){
                         custom_form.setSuccessNotification(this.response.MESSAGE, result);
 
                     }
-                }
+                }/* else {
+                    console.error("Error:", httpRequest.statusText);
+                }*/
             };
             httpRequest.send(formData);
         };
     });
 });
+

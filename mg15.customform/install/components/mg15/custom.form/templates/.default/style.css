@@ -1,5 +1,6 @@
 .custom_form {
     max-width: 500px;
+    margin: 0 auto;
 }
 
 .custom_form label {
