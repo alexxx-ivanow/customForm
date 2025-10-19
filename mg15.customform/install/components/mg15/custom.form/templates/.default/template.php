@@ -19,6 +19,9 @@ if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true) die();
 <?endif;?>
 
 <form method="post" class="custom_form jsCustomForm" action="<?=$APPLICATION->GetCurPage()?>">
+
+    <input type="hidden" name="<?=$arResult['FIELD_PREFIX']?>ACTION" value="<?=$arParams['FORM_ID']?>">
+
     <?if($arParams['IS_ANTISPAM'] === 'Y'):?>
         <input type="hidden" name="<?=$arResult['FIELD_PREFIX']?>B_FIELD" value="<?=$arResult['BOT_CODE']?>">
     <?endif;?>
@@ -29,9 +32,7 @@ if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true) die();
             <label class="form-label">
                 <span class="form_caption"><?=$arResult['ALIASES'][$field] ?: $arResult['FIELD_PREFIX'] . $field?></span>
                 <input type="text" class="form_input form-control<?if($field === 'PHONE' &&
-                $arParams['IS_PHONE_MASK'] === 'Y'):?> jsCFTel<?endif;?>"
-                       placeholder="<?=$arResult['ALIASES'][$field]
-                    ?: $arResult['FIELD_PREFIX'] . $field?>" name="<?=$arResult['FIELD_PREFIX'] . $field?>">
+                $arParams['IS_PHONE_MASK'] === 'Y'):?> jsCFTel<?endif;?>" placeholder="<?=$arResult['ALIASES'][$field] ?: $arResult['FIELD_PREFIX'] . $field?>" name="<?=$arResult['FIELD_PREFIX'] . $field?>">
                 <span class="form-text <?=$arResult['FIELD_PREFIX']?>form_error <?=$arResult['FIELD_PREFIX'] . $field?>_error"></span>
             </label>
         </div>

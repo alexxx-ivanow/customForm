@@ -1,4 +1,4 @@
-if (AbcwwwMaskPhone === undefined) {
+if (typeof AbcwwwMaskPhone === "undefined") {
     var AbcwwwMaskPhone = new function () {
         this.isNum = function (value) {
             return /\d/.test(value);
@@ -151,12 +151,11 @@ if (AbcwwwMaskPhone === undefined) {
             }
         };
     };
-}
 
-document.addEventListener('DOMContentLoaded', function(){
-    let jsTels = document.querySelectorAll('.jsCFTel');
-    console.log(jsTels)
-    jsTels.forEach(function (value) {
-        AbcwwwMaskPhone.init(value, '+7 (999) 999-99-99', false);
+    document.addEventListener('DOMContentLoaded', function(){
+        let jsTels = document.querySelectorAll('.jsCFTel');
+        jsTels.forEach(function (value) {
+            AbcwwwMaskPhone.init(value, '+7 (999) 999-99-99', false);
+        });
     });
-});
+}

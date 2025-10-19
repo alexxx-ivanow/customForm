@@ -23,6 +23,10 @@ class CustomFormComponent extends CBitrixComponent
 
     public function executeComponent()
     {
+        // Уникальный ID формы
+        $this->arParams['FORM_ID'] = "CF_" . md5($this->arParams['FORM_TITLE']);
+
+        // инициируем arResult
         $this->arResult['FIELD_PREFIX'] = self::$fieldPrefix;
         $this->arResult['MESSAGE'] = [];
         $this->arResult['ERRORS'] = [];
@@ -30,6 +34,10 @@ class CustomFormComponent extends CBitrixComponent
         $this->arResult['EXCLUDE'] = [];
         $this->arResult['BOT_CODE'] = ($this->arParams['IS_ANTISPAM'] === 'Y') ? AntiSpam::getBotValue() : '';
         $this->arResult['IS_COMMENT'] = false;
+
+        // подключаем дефолтные стили и скрипты
+        Asset::getInstance()->addCss($this->getPath() . '/lib/css/style.css');
+        Asset::getInstance()->addJs($this->getPath() . '/lib/js/script.js');
 
         // включение маски телефона
         if($this->arParams['IS_PHONE_MASK'] === 'Y') {
@@ -101,6 +109,9 @@ class CustomFormComponent extends CBitrixComponent
 
     private function manageRequest()
     {
+        // если несколько форм на странице
+        if($this->arParams['FORM_ID'] !== $this->post[self::$fieldPrefix . 'ACTION']) return;
+
         // антибот
         if($this->arParams['IS_ANTISPAM'] === 'Y') {
             if(!AntiSpam::checkBots($this->post[self::$fieldPrefix . 'B_FIELD'])) {
@@ -143,9 +154,6 @@ class CustomFormComponent extends CBitrixComponent
             $this->arResult['MESSAGE'][] = Loc::getMessage('FORM_MESSAGE_SUCCESS');
         }
 
-        $this->arResult['POST'] = $this->post;
-        //$this->arResult['FIELDS_AFTER'] = $this->fields;
-
         $this->sendJsonResponse($this->arResult);
     }
 
@@ -168,11 +176,28 @@ class CustomFormComponent extends CBitrixComponent
             'filter' => ['EVENT_NAME' => self::$eventName],
             'select' => ['ID']
         ])->fetch();
+
         if(!empty($event)) {
+            $data = $this->fields;
+
+            // создаем плейсхолдер для общего поля шаблона
+            $totalMessage = '';
+            foreach($data as $key => $field) {
+                if(array_key_exists($key, $this->arResult['ALIASES'])) {
+                    $totalMessage .= $this->arResult['ALIASES'][$key] . ': ' . $field . PHP_EOL;
+                } else {
+                    $totalMessage .= $key . ': ' . $field . PHP_EOL;
+                }
+
+            }
+            $data['MESSAGE'] = $totalMessage;
+
+            // добавляем название формы
+            $data['FORM_TITLE'] = $this->arParams['FORM_TITLE'] ? '"' . $this->arParams['FORM_TITLE'] . '"' : '';
             Event::send([
                 "EVENT_NAME" => self::$eventName,
                 "LID" => SITE_ID,
-                "C_FIELDS" => $this->fields,
+                "C_FIELDS" => $data,
             ]);
         }
     }
@@ -187,12 +212,12 @@ class CustomFormComponent extends CBitrixComponent
             $messageArr[] = $this->arResult['ALIASES'][$key] . ': ' . $field;
         }
 
+        $formTitle = ($this->arParams['FORM_TITLE']) ? ('[ ' . $this->arParams['FORM_TITLE'] . ' ]') : '';
         $arLoadProductArray = [
             "IBLOCK_SECTION_ID" => false, // элемент лежит в корне раздела
             "IBLOCK_ID"      => $this->arParams['IBLOCK_ID'],
-            "NAME"           => "Форма заполнена " . date('Y-m-d H:i:s'),
+            "NAME"           => "Форма " . $formTitle . " заполнена " . date('Y-m-d H:i:s'),
             "ACTIVE"         => "N",
-
             "PREVIEW_TEXT"   => implode(PHP_EOL, $messageArr),
         ];
         if(!$el->Add($arLoadProductArray)) {
