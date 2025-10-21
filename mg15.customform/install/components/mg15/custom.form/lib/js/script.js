@@ -4,6 +4,9 @@ if (typeof custom_form === "undefined") {
         getForms() {
             return document.querySelectorAll('.jsCustomForm');
         },
+        getPrefix() {
+            return this.prefix;
+        },
         getFormField(key, form) {
             return form.querySelector('.' + this.prefix + key + '_error');
         },
@@ -22,7 +25,7 @@ if (typeof custom_form === "undefined") {
             result.innerHTML = '<div class="custom_result_success">' + successHtml + '</div>';
         },
         clearSpanErrors(form) {
-            let span_errors = form.querySelectorAll('.' + custom_form.prefix + 'form_error');
+            let span_errors = form.querySelectorAll('.' + this.prefix + 'form_error');
             span_errors.forEach(function (item) {
                 item.innerHTML = "";
             });
@@ -47,8 +50,27 @@ if (typeof custom_form === "undefined") {
     };
 
     document.addEventListener('DOMContentLoaded', function(){
-        let forms = custom_form.getForms();
 
+        // добавляем антиспам
+        let inputs = document.querySelectorAll('input');
+        inputs.forEach(function (input) {
+            input.addEventListener('focus', function() {
+                let objForm = input.closest('form');
+                if(objForm != null) {
+                    let regAttribute = objForm.getAttribute('data-register');
+                    if(regAttribute !== null) {
+                        let nodeInput = document.createElement("input");
+                        nodeInput.setAttribute('type', 'hidden');
+                        nodeInput.setAttribute('name', custom_form.getPrefix() + 'B_FIELD');
+                        nodeInput.setAttribute('value', objForm.getAttribute('data-register'));
+                        objForm.prepend(nodeInput);
+                        objForm.removeAttribute('data-register');
+                    }
+                }
+            });
+        });
+
+        let forms = custom_form.getForms();
         forms.forEach(function (currentValue, currentIndex, listObj) {
             currentValue.onsubmit = async (e) => {
                 e.preventDefault();
@@ -74,7 +96,6 @@ if (typeof custom_form === "undefined") {
 
                         if (Object.keys(this.response.ERRORS).length !== 0) {
                             let error = this.response.ERRORS;
-                            //console.log(error);
                             for (var key in error) {
                                 let field = custom_form.getFormField(key, currentValue);
                                 let input = custom_form.getFormInput(key, currentValue);
@@ -86,17 +107,14 @@ if (typeof custom_form === "undefined") {
                                         input.classList.add('error');
                                     }
                                 } else {
-                                    console.log(field);
+                                    console.log('Неизвестный ключ: ' + key);
                                 }
                             }
                         } else {
                             custom_form.clearForm(currentValue);
                             custom_form.setSuccessNotification(this.response.MESSAGE, result);
-
                         }
-                    }/* else {
-                        console.log("Error:", this.status);
-                    }*/
+                    }
                 };
                 httpRequest.send(formData);
             };

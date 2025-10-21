@@ -8,8 +8,12 @@ $MESS['ERROR_BOT_FIELD'] = 'Попытка взлома';
 $MESS['ERROR_VALIDATE_FIELD_EMAIL'] = 'Значение email указано неверно';
 $MESS['ERROR_VALIDATE_FIELD_PHONE'] = 'Номер телефона указан неверно';
 
+$MESS['ERROR_VALIDATE_FIELD_FILE_SIZE'] = 'Недопустимый размер файла';
+$MESS['ERROR_VALIDATE_FIELD_FILE_TYPE'] = 'Неверный тип файла';
+
 $MESS['FORM_MESSAGE_SUCCESS'] = 'Сообщение успешно отправлено';
 $MESS['FORM_IBLOCK_ADD_ERROR'] = 'Ошибка добавления данных формы в инфоблок';
+$MESS['FORM_SESSION_ERROR'] = 'Попытка взлома';
 
 $MESS['CF_NAME_CAPTION'] = 'ФИО';
 $MESS['CF_EMAIL_CAPTION'] = 'E-mail';

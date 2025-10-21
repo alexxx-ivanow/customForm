@@ -4,7 +4,7 @@ use Bitrix\Main\Localization\Loc;
 if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true) die();
 ?>
 
-<?//DD($arParams);?>
+<?DD($arParams);?>
 
 <?if($arParams['FORM_TITLE']):?>
     <div class="container h-100">
@@ -18,13 +18,9 @@ if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true) die();
     </div>
 <?endif;?>
 
-<form method="post" class="custom_form jsCustomForm" action="<?=$APPLICATION->GetCurPage()?>">
-
+<form method="post" class="custom_form jsCustomForm" action="<?=$APPLICATION->GetCurPage()?>"<?if($arParams['IS_ANTISPAM'] === 'Y'):?> data-register="<?=$arResult['BOT_CODE']?>"<?endif;?><?if($arParams['IS_FILE'] === 'Y'):?>  enctype="multipart/form-data"<?endif;?>>
     <input type="hidden" name="<?=$arResult['FIELD_PREFIX']?>ACTION" value="<?=$arParams['FORM_ID']?>">
-
-    <?if($arParams['IS_ANTISPAM'] === 'Y'):?>
-        <input type="hidden" name="<?=$arResult['FIELD_PREFIX']?>B_FIELD" value="<?=$arResult['BOT_CODE']?>">
-    <?endif;?>
+    <?=bitrix_sessid_post()?>
 
     <?foreach($arParams['FIELDS'] as $key => $field):?>
         <?if(in_array($field, $arResult['EXCLUDE'])) continue;?>
@@ -46,6 +42,16 @@ if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true) die();
                 <textarea type="tel" class="form_input form-control" placeholder="<?=$arResult['ALIASES']['COMMENT'] ?:
                     (Loc::getMessage('CF_' . $field . '_CAPTION') ?: $arResult['FIELD_PREFIX'] . $field)?>" name="<?=$arResult['FIELD_PREFIX']?>COMMENT"></textarea>
                 <span class="form-text <?=$arResult['FIELD_PREFIX']?>form_error <?=$arResult['FIELD_PREFIX']?>COMMENT_error"></span>
+            </label>
+        </div>
+    <?endif;?>
+
+    <?if($arParams['IS_FILE'] === 'Y'):?>
+        <div class="mb-3">
+            <label class="form-label">
+                <span class="form_caption">Загрузите файл</span>
+                <input class="form-control" type="file" name="<?=$arResult['FIELD_PREFIX']?>FILE">
+                <span class="form-text <?=$arResult['FIELD_PREFIX']?>form_error <?=$arResult['FIELD_PREFIX']?>FILE_error"></span>
             </label>
         </div>
     <?endif;?>

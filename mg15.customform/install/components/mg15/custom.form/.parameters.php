@@ -72,6 +72,10 @@ $arComponentParameters = [
             "NAME" => 'Сохранение данных',
             "SORT" => "300"
         ],
+        "FILE_DATA" => [
+            "NAME" => 'Отправка файла',
+            "SORT" => "150"
+        ],
     ],
     "PARAMETERS" => [
         "IBLOCK_TYPE" => [
@@ -93,7 +97,7 @@ $arComponentParameters = [
         ],
         "FORM_TITLE" => [
             "PARENT" => "FIELDS",
-            "NAME" => 'Название формы',
+            "NAME" => 'Название формы (обязательно уникальное для нескольких форм на странице)',
             "TYPE" => "STRING",
             "DEFAULT" => "",
         ],
@@ -145,6 +149,53 @@ $arComponentParameters = [
             "TYPE" => "CHECKBOX",
             "DEFAULT" => "Y",
         ],
+        "IS_FILE" => [
+            "PARENT" => "FILE_DATA",
+            "NAME" => 'Добавить поле отправки файла',
+            "TYPE" => "CHECKBOX",
+            "DEFAULT" => "Y",
+            "REFRESH" => "Y",
+        ],
+        "FILE_REQUIRED" => [
+            "PARENT" => "FILE_DATA",
+            "NAME" => 'Поле файла обязательно',
+            "TYPE" => "CHECKBOX",
+            "DEFAULT" => "Y",
+            "HIDDEN" => $arCurrentValues['IS_FILE'] === "Y" ? "N" : "Y",
+        ],
+        "FILE_SIZE" => [
+            "PARENT" => "FILE_DATA",
+            "NAME" => 'Размер загружаемого файла, Мб',
+            "TYPE" => "STRING",
+            "DEFAULT" => "10",
+            "HIDDEN" => $arCurrentValues['IS_FILE'] === "Y" ? "N" : "Y",
+        ],
+        "FILE_TYPE" => [
+            "PARENT" => "FILE_DATA",
+            "NAME" => "Тип загружаемого файла",
+            "TYPE" => "LIST",
+            "MULTIPLE" => "Y",
+            "SIZE" => "5",
+            "VALUES" => [
+                "image/jpeg" => "JPG",
+                "image/png" => "PNG",
+                "application/pdf" => "PDF",
+                "text/plain" => "TXT",
+                "application/vnd.ms-excel" => "XLS",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" => "XLSX",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document" => "DOCX",
+            ],
+            "DEFAULT" => "",
+            "HIDDEN" => $arCurrentValues['IS_FILE'] === "Y" ? "N" : "Y",
+        ],
+        "FILE_FIELD_CODE" => [
+            "PARENT" => "FILE_DATA",
+            "NAME" => 'Код свойства инфоблока для сохранения файла',
+            "TYPE" => "STRING",
+            "DEFAULT" => "",
+            "HIDDEN" => $arCurrentValues['IS_FILE'] === "Y" ? "N" : "Y",
+        ],
+
         "IS_POLITICS" => [
             "PARENT" => "FIELDS",
             "NAME" => 'Добавить чекбокс согласия с политикой конфиденциальности',
@@ -159,7 +210,7 @@ $arComponentParameters = [
         ],
         "IS_BOOTSTRAP" => [
             "PARENT" => "FIELDS",
-            "NAME" => 'Подключить Bootstrap',
+            "NAME" => 'Подключить Bootstrap 5',
             "TYPE" => "CHECKBOX",
             "DEFAULT" => "Y",
         ],
@@ -174,6 +225,14 @@ $arComponentParameters = [
             "NAME" => 'Отправлять письмо',
             "TYPE" => "CHECKBOX",
             "DEFAULT" => "Y",
+            "REFRESH" => "Y",
+        ],
+        "EVENT_NAME" => [
+            "PARENT" => "ADDITIONAL",
+            "NAME" => "Почтовое событие вместо установленного модулем",
+            "HIDDEN" => $arCurrentValues['IS_SEND_EMAIL'] === "Y" ? "N" : "Y",
+            "TYPE" => "STRING",
+            "DEFAULT" => "",
         ],
     ],
 ];

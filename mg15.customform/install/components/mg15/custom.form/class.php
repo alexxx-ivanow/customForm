@@ -18,6 +18,8 @@ class CustomFormComponent extends CBitrixComponent
 
     public $post = [];
 
+    public $files = [];
+
     private static $fieldPrefix = 'CF_';
     private static $eventName = 'MG15_CUSTOM_FORM_FILLING';
 
@@ -79,7 +81,7 @@ class CustomFormComponent extends CBitrixComponent
             }
         }
 
-        // убираем пустые значения в массиве обязательных полей REQUIRED из-за доп полей в параметрах
+        // убираем пустые значения в массиве обязательных полей REQUIRED (из-за доп полей в параметрах)
         foreach($this->arParams['REQUIRED'] as $key => $field) {
             if(!$field) {
                 unset($this->arParams['REQUIRED'][$key]);
@@ -109,8 +111,14 @@ class CustomFormComponent extends CBitrixComponent
 
     private function manageRequest()
     {
+
         // если несколько форм на странице
         if($this->arParams['FORM_ID'] !== $this->post[self::$fieldPrefix . 'ACTION']) return;
+
+        // проверяем сессию
+        if(!check_bitrix_sessid()) {
+            $this->arResult['ERRORS']['RESULT'] = Loc::getMessage('FORM_SESSION_ERROR');
+        }
 
         // антибот
         if($this->arParams['IS_ANTISPAM'] === 'Y') {
@@ -138,6 +146,34 @@ class CustomFormComponent extends CBitrixComponent
             } else { // валидация заполненного поля
                 if(Validate::validateField($field, $this->post[self::$fieldPrefix . $field]) === false) {
                     $this->arResult['ERRORS'][$field] = Loc::getMessage('ERROR_VALIDATE_FIELD_' . $field);
+                }
+            }
+        }
+
+        //$this->arResult['FILES'] = $_FILES;
+
+        // работа с файлами
+        if($this->arParams['IS_FILE'] === 'Y') {
+            if(is_array($_FILES) && count($_FILES)) {
+                foreach ($_FILES as $file){
+                    if (!empty($file['tmp_name'])) {
+                        // проверка файла по типу
+                        if(count($this->arParams['FILE_TYPE'])) {
+                            if(is_array($this->arParams['FILE_TYPE']) && !in_array($file['type'], $this->arParams['FILE_TYPE'])) {
+                                $this->arResult['ERRORS']['FILE'] = Loc::getMessage('ERROR_VALIDATE_FIELD_FILE_TYPE');
+                                continue;
+                            }
+                        }
+
+                        // проверка файла по размеру
+                        if((int)$this->arParams['FILE_SIZE'] && (intval($file['size']) > intval($this->arParams['FILE_SIZE'] * 1048 * 1048))) {
+                            $this->arResult['ERRORS']['FILE'] = Loc::getMessage('ERROR_VALIDATE_FIELD_FILE_SIZE');
+                            continue;
+                        }
+                        $this->files[] = CFile::SaveFile($file, 'cf_files');
+                    } elseif($this->arParams['FILE_REQUIRED'] === 'Y') { // проверка на пустоту, если задан параметр
+                        $this->arResult['ERRORS']['FILE'] = Loc::getMessage('FORM_REQUIRED_FIELD', ['FIELD' => 'файл']);
+                    }
                 }
             }
         }
@@ -180,7 +216,7 @@ class CustomFormComponent extends CBitrixComponent
         if(!empty($event)) {
             $data = $this->fields;
 
-            // создаем плейсхолдер для общего поля шаблона
+            // создаем макрос для общего поля почтового шаблона
             $totalMessage = '';
             foreach($data as $key => $field) {
                 if(array_key_exists($key, $this->arResult['ALIASES'])) {
@@ -195,9 +231,10 @@ class CustomFormComponent extends CBitrixComponent
             // добавляем название формы
             $data['FORM_TITLE'] = $this->arParams['FORM_TITLE'] ? '"' . $this->arParams['FORM_TITLE'] . '"' : '';
             Event::send([
-                "EVENT_NAME" => self::$eventName,
+                "EVENT_NAME" => $this->arParams['EVENT_NAME'] ?: self::$eventName,
                 "LID" => SITE_ID,
                 "C_FIELDS" => $data,
+                "FILE" => $this->files,
             ]);
         }
     }
@@ -212,12 +249,21 @@ class CustomFormComponent extends CBitrixComponent
             $messageArr[] = $this->arResult['ALIASES'][$key] . ': ' . $field;
         }
 
+        $PROP = [];
+        // грузим файл в инфоблок
+        if($this->arParams['IS_FILE'] && count($this->files) && $this->arParams['FILE_FIELD_CODE']) {
+            foreach($this->files as $key => $file) {
+                $PROP[$this->arParams['FILE_FIELD_CODE']] = $file;
+            }
+        }
+
         $formTitle = ($this->arParams['FORM_TITLE']) ? ('[ ' . $this->arParams['FORM_TITLE'] . ' ]') : '';
         $arLoadProductArray = [
             "IBLOCK_SECTION_ID" => false, // элемент лежит в корне раздела
             "IBLOCK_ID"      => $this->arParams['IBLOCK_ID'],
             "NAME"           => "Форма " . $formTitle . " заполнена " . date('Y-m-d H:i:s'),
             "ACTIVE"         => "N",
+            "PROPERTY_VALUES"=> $PROP,
             "PREVIEW_TEXT"   => implode(PHP_EOL, $messageArr),
         ];
         if(!$el->Add($arLoadProductArray)) {
