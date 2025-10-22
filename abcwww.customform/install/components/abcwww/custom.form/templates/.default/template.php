@@ -4,8 +4,6 @@ use Bitrix\Main\Localization\Loc;
 if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true) die();
 ?>
 
-<?DD($arParams);?>
-
 <?if($arParams['FORM_TITLE']):?>
     <div class="container h-100">
         <div class="row h-100 align-items-center justify-content-center text-center">

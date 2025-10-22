@@ -1,6 +1,6 @@
 <?
 // пространство имен модуля
-namespace mg15\customform;
+namespace abcwww\customform;
 
 // install/version.php или в установочном скрипте модуля
 
@@ -17,9 +17,9 @@ class Events
     {
         $eventTypes = [
             [
-                'EVENT_NAME' => 'MG15_CUSTOM_FORM_FILLING',
-                'NAME' => Loc::getMessage('MG15_CUSTOM_FORM_FILLING_NAME'),
-                'DESCRIPTION' => Loc::getMessage('MG15_CUSTOM_FORM_FILLING_DESC'),      
+                'EVENT_NAME' => 'ABCWWW_CUSTOM_FORM_FILLING',
+                'NAME' => Loc::getMessage('ABCWWW_CUSTOM_FORM_FILLING_NAME'),
+                'DESCRIPTION' => Loc::getMessage('ABCWWW_CUSTOM_FORM_FILLING_DESC'),
                 'LID' => SITE_ID,
                 'SORT' => 100,
             ]           
@@ -59,13 +59,13 @@ class Events
         $templates = [
             [
                 "ACTIVE"      => "Y",
-                "EVENT_NAME"  => 'MG15_CUSTOM_FORM_FILLING',
+                "EVENT_NAME"  => 'ABCWWW_CUSTOM_FORM_FILLING',
                 "LID"         => $lids,
                 "EMAIL_FROM"  => "#DEFAULT_EMAIL_FROM#",
                 "EMAIL_TO"    => "#DEFAULT_EMAIL_FROM#",
-                "SUBJECT"     => Loc::getMessage('MG15_CUSTOM_FORM_TEMPLATE_SUBJECT'),
+                "SUBJECT"     => Loc::getMessage('ABCWWW_CUSTOM_FORM_TEMPLATE_SUBJECT'),
                 "BODY_TYPE"   => "html",
-                "MESSAGE"     => Loc::getMessage('MG15_CUSTOM_FORM_TEMPLATE_MESSAGE'),
+                "MESSAGE"     => Loc::getMessage('ABCWWW_CUSTOM_FORM_TEMPLATE_MESSAGE'),
             ]            
         ];
 

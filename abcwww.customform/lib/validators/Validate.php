@@ -1,11 +1,11 @@
 <?
-namespace mg15\customform;
+namespace abcwww\customform;
 
 class Validate {
     public static function validateField($field, $value)
     {
         $method = 'validate' . ucfirst(strtolower($field));
-        if(method_exists('mg15\customform\Validate', $method)) {
+        if(method_exists('abcwww\customform\Validate', $method)) {
             return self::$method($value);
         }
         return true;

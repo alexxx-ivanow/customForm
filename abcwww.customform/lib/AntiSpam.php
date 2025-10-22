@@ -1,5 +1,5 @@
 <?
-namespace mg15\customform;
+namespace abcwww\customform;
 class AntiSpam {
     public static function getBotValue()
     {

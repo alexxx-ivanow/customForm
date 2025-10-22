@@ -3,14 +3,14 @@ use Bitrix\Main\HttpResponse,
     Bitrix\Main\Page\Asset,
     Bitrix\Main\Localization\Loc,
     Bitrix\Main\Mail\Internal\EventTypeTable,
-    mg15\customform\AntiSpam,
-    mg15\customform\Validate,
+    abcwww\customform\AntiSpam,
+    abcwww\customform\Validate,
     Bitrix\Main\Loader,
     Bitrix\Main\Mail\Event;
 
 if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true) die();
 
-Loader::includeModule('mg15.customform');
+Loader::includeModule('abcwww.customform');
 class CustomFormComponent extends CBitrixComponent
 {
 
@@ -21,7 +21,7 @@ class CustomFormComponent extends CBitrixComponent
     public $files = [];
 
     private static $fieldPrefix = 'CF_';
-    private static $eventName = 'MG15_CUSTOM_FORM_FILLING';
+    private static $eventName = 'ABCWWW_CUSTOM_FORM_FILLING';
 
     public function executeComponent()
     {

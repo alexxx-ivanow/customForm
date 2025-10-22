@@ -14,12 +14,12 @@ use \Bitrix\Main\Loader;
 // пространство имен для событий
 use \Bitrix\Main\EventManager;
 // пространство имен для почтовых событий
-use mg15\customform\Events;
+use abcwww\customform\Events;
 
 // подключение ланговых файлов
 Loc::loadMessages(__FILE__);
 
-class Mg15_Customform extends CModule
+class abcwww_Customform extends CModule
 {
     // переменные модуля
     public  $MODULE_ID;
@@ -46,16 +46,16 @@ class Mg15_Customform extends CModule
         // дата релиза версии модуля
         $this->MODULE_VERSION_DATE = $arModuleVersion['VERSION_DATE'];
         // id модуля
-        $this->MODULE_ID = "mg15.customform";
+        $this->MODULE_ID = "abcwww.customform";
         // ID вендора
-        $this->MODULE_SHORT_ID = "mg15";
+        $this->MODULE_SHORT_ID = "abcwww";
         // название модуля
         $this->MODULE_NAME = "Кастомная форма обратной связи";
         // описание модуля
         $this->MODULE_DESCRIPTION = "Форма обратной связи с отправкой через ajax";
         // имя партнера выпустившего модуль
         $this->PARTNER_NAME = "АБВ сайт";
-        // ссылка на рисурс партнера выпустившего модуль
+        // ссылка на ресурс партнера выпустившего модуль
         $this->PARTNER_URI = "https://www.abcwww.ru";
         // если указано, то на странице прав доступа будут показаны администраторы и группы
         $this->SHOW_SUPER_ADMIN_GROUP_RIGHTS = 'Y';
@@ -67,7 +67,7 @@ class Mg15_Customform extends CModule
     {
         global $APPLICATION;
         // регистрируем модуль в системе
-        ModuleManager::RegisterModule("mg15.customform");
+        ModuleManager::RegisterModule("abcwww.customform");
         // создаем таблицы баз данных, необходимые для работы модуля
         //$this->InstallDB();
         // создаем первую и единственную запись в БД
@@ -94,7 +94,7 @@ class Mg15_Customform extends CModule
         // удаляем файлы, необходимые для работы модуля
         $this->UnInstallFiles();
         // удаляем регистрацию модуля в системе
-        ModuleManager::UnRegisterModule("mg15.customform");
+        ModuleManager::UnRegisterModule("abcwww.customform");
         // подключаем скрипт с административным прологом и эпилогом
         $APPLICATION->includeAdminFile(
             Loc::getMessage('DEINSTALL_TITLE'),
@@ -109,14 +109,14 @@ class Mg15_Customform extends CModule
         // подключаем модуль для того что бы был видем класс ORM
         Loader::includeModule($this->MODULE_ID);
         // через класс Application получаем соединение по переданному параметру, параметр берем из ORM-сущности (он указывается, если необходим другой тип подключения, отличный от default), если тип подключения по умолчанию, то параметр можно не передавать. Далее по подключению вызываем метод isTableExists, в который передаем название таблицы полученное с помощью метода getDBTableName() класса Base
-        if (!Application::getConnection(\Hmarketing\d7\DataTable::getConnectionName())->isTableExists(Base::getInstance("\Hmarketing\d7\DataTable")->getDBTableName())) {
+        if (!Application::getConnection(\Hmarketing\d7\DataTable::getConnectionName())->isTableExists(Base::getInstance("\abcwww\customform\DataTable")->getDBTableName())) {
             // eсли таблицы не существует, то создаем её по ORM сущности
-            Base::getInstance("\mg15\customform\DataTable")->createDbTable();
+            Base::getInstance("\abcwww\customform\DataTable")->createDbTable();
         }
 
-        if (!Application::getConnection(\Hmarketing\d7\DataTable::getConnectionName())->isTableExists(Base::getInstance("\Hmarketing\d7\AuthorTable")->getDBTableName())) {
+        if (!Application::getConnection(\Hmarketing\d7\DataTable::getConnectionName())->isTableExists(Base::getInstance("\abcwww\d7\customform")->getDBTableName())) {
             // eсли таблицы не существует, то создаем её по ORM сущности
-            Base::getInstance("\mg15\customform\AuthorTable")->createDbTable();
+            Base::getInstance("\abcwww\customform\AuthorTable")->createDbTable();
         }
     }
 
@@ -126,9 +126,9 @@ class Mg15_Customform extends CModule
         // подключаем модуль для того что бы был видем класс ORM
         Loader::includeModule($this->MODULE_ID);
         // делаем запрос к бд на удаление таблицы, если она существует, по подключению к бд класса Application с параметром подключения ORM сущности
-        Application::getConnection(\mg15\customform\DataTable::getConnectionName())->queryExecute('DROP TABLE IF EXISTS ' . Base::getInstance("\mg15\customform\DataTable")->getDBTableName());
+        Application::getConnection(\abcwww\customform\DataTable::getConnectionName())->queryExecute('DROP TABLE IF EXISTS ' . Base::getInstance("\abcwww\customform\DataTable")->getDBTableName());
 
-        Application::getConnection(\mg15\customform\DataTable::getConnectionName())->queryExecute('DROP TABLE IF EXISTS ' . Base::getInstance("\mg15\customform\AuthorTable")->getDBTableName());
+        Application::getConnection(\abcwww\customform\DataTable::getConnectionName())->queryExecute('DROP TABLE IF EXISTS ' . Base::getInstance("\abcwww\customform\AuthorTable")->getDBTableName());
 
         // удаляем параметры модуля из базы данных битрикс
         Option::delete($this->MODULE_ID);
@@ -165,7 +165,7 @@ class Mg15_Customform extends CModule
         // скопируем компоненты из папки в битрикс, копирует одноименные файлы из одной директории в другую директорию
         CopyDirFiles(
             __DIR__ . "/components",
-            $_SERVER["DOCUMENT_ROOT"] . "/local/components",
+            $_SERVER["DOCUMENT_ROOT"] . "/bitrix/components",
             true, // перезаписывает файлы
             true  // копирует рекурсивно
         );
@@ -190,10 +190,10 @@ class Mg15_Customform extends CModule
         );
 
         // удалим компонент из папки в битрикс 
-        if (is_dir($_SERVER["DOCUMENT_ROOT"] . "/local/components/" . $this->MODULE_SHORT_ID)) {
+        if (is_dir($_SERVER["DOCUMENT_ROOT"] . "/bitrix/components/" . $this->MODULE_SHORT_ID)) {
             // удаляет папку из указанной директории, функция работает рекурсивно
             DeleteDirFilesEx(
-                "/local/components/" . $this->MODULE_SHORT_ID
+                "/bitrix/components/" . $this->MODULE_SHORT_ID
             );
         }
 
@@ -212,12 +212,12 @@ class Mg15_Customform extends CModule
         Loader::includeModule($this->MODULE_ID);
 
         // добавляем запись в таблицу БД
-        \mg15\customform\DataTable::add(
+        \abcwww\customform\DataTable::add(
             array(
                 "ACTIVE" => "N",
                 "SITE" => '["s1"]',
                 "LINK" => " ",
-                "LINK_PICTURE" => "/local/components/mg15.customform/popup.baner/templates/.default/img/banner.jpg",
+                "LINK_PICTURE" => "/bitrix/components/abcwww.customform/popup.baner/templates/.default/img/banner.jpg",
                 "ALT_PICTURE" => " ",
                 "EXCEPTIONS" => " ",
                 "DATE" => new \Bitrix\Main\Type\DateTime(date("d.m.Y H:i:s")),
@@ -227,7 +227,7 @@ class Mg15_Customform extends CModule
         );
 
         // добавляем запись в таблицу БД
-        \mg15\customform\AuthorTable::add(
+        \abcwww\customform\AuthorTable::add(
             array(
                 "NAME" => "Иван",
                 "LAST_NAME" => "Иванов",
