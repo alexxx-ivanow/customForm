@@ -187,7 +187,7 @@ class CustomFormComponent extends CBitrixComponent
                 $this->writeToIblock(); // делаем запись в инфоблок
             }
 
-            $this->arResult['MESSAGE'][] = Loc::getMessage('FORM_MESSAGE_SUCCESS');
+            $this->arResult['MESSAGE'][] = $this->arParams['SUCCESS_TEXT'] ?: Loc::getMessage('FORM_MESSAGE_SUCCESS');
         }
 
         $this->sendJsonResponse($this->arResult);

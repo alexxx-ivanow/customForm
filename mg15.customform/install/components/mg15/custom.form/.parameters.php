@@ -72,6 +72,10 @@ $arComponentParameters = [
             "NAME" => 'Сохранение данных',
             "SORT" => "300"
         ],
+        "AGREE" => [
+            "NAME" => 'Согласие',
+            "SORT" => "180"
+        ],
         "FILE_DATA" => [
             "NAME" => 'Отправка файла',
             "SORT" => "150"
@@ -149,6 +153,12 @@ $arComponentParameters = [
             "TYPE" => "CHECKBOX",
             "DEFAULT" => "Y",
         ],
+        "SUCCESS_TEXT" => [
+            "PARENT" => "FIELDS",
+            "NAME" => "Сообщение об успешной отправке",
+            "TYPE" => "STRING",
+            "DEFAULT" => "Спасибо! Ваше сообщение отправлено.",
+        ],
         "IS_FILE" => [
             "PARENT" => "FILE_DATA",
             "NAME" => 'Добавить поле отправки файла',
@@ -197,16 +207,30 @@ $arComponentParameters = [
         ],
 
         "IS_POLITICS" => [
-            "PARENT" => "FIELDS",
+            "PARENT" => "AGREE",
             "NAME" => 'Добавить чекбокс согласия с политикой конфиденциальности',
             "TYPE" => "CHECKBOX",
             "DEFAULT" => "Y",
+            "REFRESH" => "Y",
+        ],
+        "POLITICS_TEXT" => [
+            "PARENT" => "AGREE",
+            "NAME" => "Текст согласия с политикой конфиденциальности",
+            "HIDDEN" => $arCurrentValues['IS_POLITICS'] === "Y" ? "N" : "Y",
+            "TYPE" => "STRING"
         ],
         "IS_AGREE" => [
-            "PARENT" => "FIELDS",
+            "PARENT" => "AGREE",
             "NAME" => 'Добавить чекбокс согласия с обработкой персональных данных',
             "TYPE" => "CHECKBOX",
             "DEFAULT" => "Y",
+            "REFRESH" => "Y",
+        ],
+        "AGREE_TEXT" => [
+            "PARENT" => "AGREE",
+            "NAME" => "Текст согласия с обработкой персональных данных",
+            "HIDDEN" => $arCurrentValues['IS_AGREE'] === "Y" ? "N" : "Y",
+            "TYPE" => "STRING"
         ],
         "IS_BOOTSTRAP" => [
             "PARENT" => "FIELDS",

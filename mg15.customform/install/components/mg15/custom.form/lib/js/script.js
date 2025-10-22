@@ -92,7 +92,7 @@ if (typeof custom_form === "undefined") {
                         custom_form.clearSpanErrors(currentValue);
                         custom_form.clearInputErrors(currentValue);
 
-                        console.log(this.response);
+                        //console.log(this.response);
 
                         if (Object.keys(this.response.ERRORS).length !== 0) {
                             let error = this.response.ERRORS;

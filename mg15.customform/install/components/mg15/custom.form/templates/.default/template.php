@@ -60,7 +60,7 @@ if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true) die();
         <div class="form-group form-check">
             <label class="form-label">
                 <input class="form_caption form-check-input" type="checkbox" name="<?=$arResult['FIELD_PREFIX']?>POLITICS" value="Y">
-                <span class="form_input">Согласен на обработку политики конфиденциальности</span>
+                <span class="form_input"><?=$arParams['~POLITICS_TEXT'] ?: 'Согласен на обработку политики конфиденциальности'?></span>
             </label>
             <span class="form-text <?=$arResult['FIELD_PREFIX']?>form_error <?=$arResult['FIELD_PREFIX']?>POLITICS_error"></span>
         </div>
@@ -70,7 +70,7 @@ if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true) die();
         <div class="form-group form-check">
             <label class="form-label">
                 <input class="form_caption form-check-input" type="checkbox" name="<?=$arResult['FIELD_PREFIX']?>AGREE" value="Y">
-                <span class="form_input">Согласен на обработку персональных данных</span>
+                <span class="form_input"><?=$arParams['~AGREE_TEXT'] ?: 'Согласен на обработку персональных данных'?></span>
             </label>
             <span class="form-text <?=$arResult['FIELD_PREFIX']?>form_error <?=$arResult['FIELD_PREFIX']?>AGREE_error"></span>
         </div>
