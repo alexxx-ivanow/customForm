@@ -110,9 +110,33 @@ if (typeof custom_form === "undefined") {
                                     console.log('Неизвестный ключ: ' + key);
                                 }
                             }
+
+                            const cf_event = new CustomEvent("cf_success", {
+                                detail: {
+                                    //bubbles: true,
+                                    //cancelable: true,
+                                    message: this.response.MESSAGE,
+                                    success: false,
+                                    errors: this.response.ERRORS
+                                }
+                            });
+                            document.dispatchEvent(cf_event);
+
                         } else {
                             custom_form.clearForm(currentValue);
                             custom_form.setSuccessNotification(this.response.MESSAGE, result);
+
+                            const cf_event = new CustomEvent("cf_success", {
+                                detail: {
+                                    //bubbles: true,
+                                    //cancelable: true,
+                                    message: this.response.MESSAGE,
+                                    success: true,
+                                    errors: []
+                                }
+                            });
+                            document.dispatchEvent(cf_event);
+
                         }
                     }
                 };

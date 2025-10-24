@@ -188,6 +188,8 @@ class CustomFormComponent extends CBitrixComponent
             }
 
             $this->arResult['MESSAGE'][] = $this->arParams['SUCCESS_TEXT'] ?: Loc::getMessage('FORM_MESSAGE_SUCCESS');
+        } else {
+            $this->arResult['MESSAGE'][] = $this->arParams['ERROR_TEXT'] ?: Loc::getMessage('FORM_MESSAGE_ERROR');
         }
 
         $this->sendJsonResponse($this->arResult);

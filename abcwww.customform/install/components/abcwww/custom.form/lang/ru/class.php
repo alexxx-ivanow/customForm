@@ -12,6 +12,7 @@ $MESS['ERROR_VALIDATE_FIELD_FILE_SIZE'] = 'Недопустимый размер
 $MESS['ERROR_VALIDATE_FIELD_FILE_TYPE'] = 'Неверный тип файла';
 
 $MESS['FORM_MESSAGE_SUCCESS'] = 'Сообщение успешно отправлено';
+$MESS['FORM_MESSAGE_ERROR'] = 'Ошибка при отправке формы';
 $MESS['FORM_IBLOCK_ADD_ERROR'] = 'Ошибка добавления данных формы в инфоблок';
 $MESS['FORM_SESSION_ERROR'] = 'Попытка взлома';
 

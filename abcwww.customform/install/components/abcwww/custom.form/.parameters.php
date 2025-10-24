@@ -162,6 +162,12 @@ $arComponentParameters = [
             "TYPE" => "STRING",
             "DEFAULT" => "Спасибо! Ваше сообщение отправлено.",
         ],
+        "ERROR_TEXT" => [
+            "PARENT" => "FIELDS",
+            "NAME" => Loc::getMessage('ERROR_TEXT_NAME'),
+            "TYPE" => "STRING",
+            "DEFAULT" => "Ошибка при отправке формы",
+        ],
         "IS_FILE" => [
             "PARENT" => "FILE_DATA",
             "NAME" => Loc::getMessage('IS_FILE_NAME'),
