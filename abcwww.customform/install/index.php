@@ -1,18 +1,25 @@
 <?
 // пространство имен для подключений ланговых файлов
 use Bitrix\Main\Localization\Loc;
+
 // пространство имен для управления (регистрации/удалении) модуля в системе/базе
 use Bitrix\Main\ModuleManager;
+
 // пространство имен для работы с параметрами модулей хранимых в базе данных
 use Bitrix\Main\Config\Option;
+
 // пространство имен с абстрактным классом для любых приложений, любой конкретный класс приложения является наследником этого абстрактного класса
 use Bitrix\Main\Application;
+
 // пространство имен для работы c ORM
 use \Bitrix\Main\Entity\Base;
+
 // пространство имен для автозагрузки модулей
 use \Bitrix\Main\Loader;
+
 // пространство имен для событий
 use \Bitrix\Main\EventManager;
+
 // пространство имен для почтовых событий
 use abcwww\customform\Events;
 
@@ -22,17 +29,17 @@ Loc::loadMessages(__FILE__);
 class abcwww_Customform extends CModule
 {
     // переменные модуля
-    public  $MODULE_ID;
-    public  $MODULE_SHORT_ID;
-    public  $MODULE_VERSION;
-    public  $MODULE_VERSION_DATE;
-    public  $MODULE_NAME;
-    public  $MODULE_DESCRIPTION;
-    public  $PARTNER_NAME;
-    public  $PARTNER_URI;
-    public  $SHOW_SUPER_ADMIN_GROUP_RIGHTS;
-    public  $MODULE_GROUP_RIGHTS;
-    public  $errors;
+    public $MODULE_ID;
+    public $MODULE_SHORT_ID;
+    public $MODULE_VERSION;
+    public $MODULE_VERSION_DATE;
+    public $MODULE_NAME;
+    public $MODULE_DESCRIPTION;
+    public $PARTNER_NAME;
+    public $PARTNER_URI;
+    public $SHOW_SUPER_ADMIN_GROUP_RIGHTS;
+    public $MODULE_GROUP_RIGHTS;
+    public $errors;
 
     function __construct()
     {
@@ -221,8 +228,8 @@ class abcwww_Customform extends CModule
                 "ALT_PICTURE" => " ",
                 "EXCEPTIONS" => " ",
                 "DATE" => new \Bitrix\Main\Type\DateTime(date("d.m.Y H:i:s")),
-                "TARGET" =>  "self",
-                "AUTHOR_ID" =>  "1",
+                "TARGET" => "self",
+                "AUTHOR_ID" => "1",
             )
         );
 

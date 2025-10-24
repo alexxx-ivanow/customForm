@@ -12,7 +12,7 @@ use Bitrix\Main\Mail\Internal\EventMessageTable;
 Loc::loadMessages(__FILE__);
 
 class Events
-{    
+{
     public static function InstallEvents()
     {
         $eventTypes = [
@@ -22,7 +22,7 @@ class Events
                 'DESCRIPTION' => Loc::getMessage('ABCWWW_CUSTOM_FORM_FILLING_DESC'),
                 'LID' => SITE_ID,
                 'SORT' => 100,
-            ]           
+            ]
         ];
 
         foreach ($eventTypes as $eventType) {
@@ -58,15 +58,15 @@ class Events
 
         $templates = [
             [
-                "ACTIVE"      => "Y",
-                "EVENT_NAME"  => 'ABCWWW_CUSTOM_FORM_FILLING',
-                "LID"         => $lids,
-                "EMAIL_FROM"  => "#DEFAULT_EMAIL_FROM#",
-                "EMAIL_TO"    => "#DEFAULT_EMAIL_FROM#",
-                "SUBJECT"     => Loc::getMessage('ABCWWW_CUSTOM_FORM_TEMPLATE_SUBJECT'),
-                "BODY_TYPE"   => "html",
-                "MESSAGE"     => Loc::getMessage('ABCWWW_CUSTOM_FORM_TEMPLATE_MESSAGE'),
-            ]            
+                "ACTIVE" => "Y",
+                "EVENT_NAME" => 'ABCWWW_CUSTOM_FORM_FILLING',
+                "LID" => $lids,
+                "EMAIL_FROM" => Loc::getMessage('ABCWWW_CUSTOM_FORM_EVENT_EMAIL_FROM'),
+                "EMAIL_TO" => Loc::getMessage('ABCWWW_CUSTOM_FORM_EVENT_EMAIL_TO'),
+                "SUBJECT" => Loc::getMessage('ABCWWW_CUSTOM_FORM_TEMPLATE_SUBJECT'),
+                "BODY_TYPE" => "html",
+                "MESSAGE" => Loc::getMessage('ABCWWW_CUSTOM_FORM_TEMPLATE_MESSAGE'),
+            ]
         ];
 
         foreach ($templates as $template) {
@@ -80,7 +80,7 @@ class Events
     {
         try {
             $eventMessage = new \CEventMessage;
-            $id = $eventMessage->Add($fields);            
+            $id = $eventMessage->Add($fields);
             return $id;
         } catch (\Exception $e) {
             // Логирование ошибки

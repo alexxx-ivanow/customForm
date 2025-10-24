@@ -1,9 +1,11 @@
 <?
+
 namespace abcwww\customform;
-class AntiSpam {
+class AntiSpam
+{
     public static function getBotValue()
     {
-        if(
+        if (
             !isset($_SESSION['data-register']) ||
             !$_SESSION['data-register']
         ) {
@@ -15,14 +17,14 @@ class AntiSpam {
 
     public static function checkBots($request = '')
     {
-        if(
+        if (
             empty($request) ||
             (
-            isset($request)
-            && !empty($request)
-            && $request !== self::getBotValue()
+                isset($request)
+                && !empty($request)
+                && $request !== self::getBotValue()
             )
-        ){
+        ) {
             return false;
         }
         return true;

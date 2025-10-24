@@ -1,12 +1,14 @@
 <?
+
 use Bitrix\Main\Mail\Internal\EventTypeTable,
     Bitrix\Iblock\IblockTable,
     Bitrix\Iblock\TypeTable,
+    Bitrix\Main\Localization\Loc,
     Bitrix\Main\Web\Json;
 
-if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true) die();
+if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) die();
 
-if(!CModule::IncludeModule("iblock"))
+if (!CModule::IncludeModule("iblock"))
     return;
 
 CBitrixComponent::includeComponentClass('bitrix:catalog.element');
@@ -33,7 +35,7 @@ foreach ($types as $type) {
 $arIBlocks = [];
 $arIblockList = IblockTable::getList([
     'filter' => [
-        "IBLOCK_TYPE_ID" => ($arCurrentValues["IBLOCK_TYPE"]!="-"?$arCurrentValues["IBLOCK_TYPE"]:"")
+        "IBLOCK_TYPE_ID" => ($arCurrentValues["IBLOCK_TYPE"] != "-" ? $arCurrentValues["IBLOCK_TYPE"] : "")
     ],
     'order' => [
         'SORT' => 'ASC'
@@ -43,7 +45,7 @@ $arIblockList = IblockTable::getList([
         'NAME',
     ],
 ]);
-while($arIblock = $arIblockList->Fetch()) {
+while ($arIblock = $arIblockList->Fetch()) {
     $arIBlocks[$arIblock["ID"]] = $arIblock["NAME"];
 }
 
@@ -54,37 +56,37 @@ $eventsList = EventTypeTable::getList(array(
     'order' => ['ID' => 'DESC']
 ));
 $resultEventsList = [];
-while($arRes = $eventsList->Fetch()) {
+while ($arRes = $eventsList->Fetch()) {
     $resultEventsList[$arRes["EVENT_NAME"]] = $arRes["NAME"];
 }
 
 $arComponentParameters = [
     "GROUPS" => [
         "FIELDS" => [
-            "NAME" => 'Параметры формы',
+            "NAME" => Loc::getMessage('GROUPS_FIELDS_NAME'),
             "SORT" => "100"
         ],
         "ADDITIONAL" => [
-            "NAME" => 'Отправка почты',
+            "NAME" => Loc::getMessage('GROUPS_ADDITIONAL_NAME'),
             "SORT" => "200"
         ],
         "ADD_DATA" => [
-            "NAME" => 'Сохранение данных',
+            "NAME" => Loc::getMessage('GROUPS_ADD_DATA_NAME'),
             "SORT" => "300"
         ],
         "AGREE" => [
-            "NAME" => 'Согласие',
+            "NAME" => Loc::getMessage('GROUPS_AGREE_NAME'),
             "SORT" => "180"
         ],
         "FILE_DATA" => [
-            "NAME" => 'Отправка файла',
+            "NAME" => Loc::getMessage('GROUPS_FILE_DATA_NAME'),
             "SORT" => "150"
         ],
     ],
     "PARAMETERS" => [
         "IBLOCK_TYPE" => [
             "PARENT" => "ADD_DATA",
-            "NAME" => "Тип инфоблока для данных формы",
+            "NAME" => Loc::getMessage('IBLOCK_TYPE_NAME'),
             "TYPE" => "LIST",
             "VALUES" => $iblockTypes,
             "DEFAULT" => "news",
@@ -92,7 +94,7 @@ $arComponentParameters = [
         ],
         "IBLOCK_ID" => [
             "PARENT" => "ADD_DATA",
-            "NAME" => "ID инфоблока для данных формы",
+            "NAME" => Loc::getMessage('IBLOCK_ID_NAME'),
             "TYPE" => "LIST",
             "VALUES" => $arIBlocks,
             "DEFAULT" => '={$_REQUEST["ID"]}',
@@ -101,13 +103,13 @@ $arComponentParameters = [
         ],
         "FORM_TITLE" => [
             "PARENT" => "FIELDS",
-            "NAME" => 'Название формы (обязательно уникальное для нескольких форм на странице)',
+            "NAME" => Loc::getMessage('FORM_TITLE_NAME'),
             "TYPE" => "STRING",
             "DEFAULT" => "",
         ],
         "FIELDS" => [
             "PARENT" => "FIELDS",
-            "NAME" => "Список полей для формы",
+            "NAME" => Loc::getMessage('FIELDS_NAME'),
             "TYPE" => "LIST",
             "MULTIPLE" => "Y",
             "SIZE" => "5",
@@ -117,11 +119,12 @@ $arComponentParameters = [
                 "PHONE" => "Телефон",
                 "COMMENT" => "Комментарий",
             ],
+            "DEFAULT" => ["NAME","EMAIL","PHONE","COMMENT"],
             "ADDITIONAL_VALUES" => "Y",
         ],
         "REQUIRED" => [
             "PARENT" => "FIELDS",
-            "NAME" => "Обязательные поля",
+            "NAME" => Loc::getMessage('REQUIRED_NAME'),
             "TYPE" => "LIST",
             "MULTIPLE" => "Y",
             "SIZE" => "5",
@@ -131,14 +134,14 @@ $arComponentParameters = [
                 "PHONE" => "Телефон",
                 "COMMENT" => "Комментарий",
             ],
-            "DEFAULT" => "",
+            "DEFAULT" => ["NAME","EMAIL","PHONE"],
             "ADDITIONAL_VALUES" => "Y",
         ],
         "FIELDS_ORDER" => [
             'PARENT' => 'FIELDS',
-            'NAME' => 'Сортировка полей',
+            'NAME' => Loc::getMessage('FIELDS_ORDER_NAME'),
             'TYPE' => 'CUSTOM',
-            'JS_FILE' => CatalogElementComponent::getSettingsScript('/bitrix/components/abcwww/custom.form', 'dragdrop_order'),
+            'JS_FILE' => CatalogElementComponent::getSettingsScript($componentPath, 'dragdrop_order'),
             'JS_EVENT' => 'initDraggableOrderControl',
             'JS_DATA' => Json::encode([
                 "NAME" => "ФИО",
@@ -149,40 +152,40 @@ $arComponentParameters = [
         ],
         "IS_PHONE_MASK" => [
             "PARENT" => "FIELDS",
-            "NAME" => 'Включить маску для поля телефона',
+            "NAME" => Loc::getMessage('IS_PHONE_MASK_NAME'),
             "TYPE" => "CHECKBOX",
             "DEFAULT" => "Y",
         ],
         "SUCCESS_TEXT" => [
             "PARENT" => "FIELDS",
-            "NAME" => "Сообщение об успешной отправке",
+            "NAME" => Loc::getMessage('SUCCESS_TEXT_NAME'),
             "TYPE" => "STRING",
             "DEFAULT" => "Спасибо! Ваше сообщение отправлено.",
         ],
         "IS_FILE" => [
             "PARENT" => "FILE_DATA",
-            "NAME" => 'Добавить поле отправки файла',
+            "NAME" => Loc::getMessage('IS_FILE_NAME'),
             "TYPE" => "CHECKBOX",
             "DEFAULT" => "Y",
             "REFRESH" => "Y",
         ],
         "FILE_REQUIRED" => [
             "PARENT" => "FILE_DATA",
-            "NAME" => 'Поле файла обязательно',
+            "NAME" => Loc::getMessage('FILE_REQUIRED_NAME'),
             "TYPE" => "CHECKBOX",
-            "DEFAULT" => "Y",
+            "DEFAULT" => "",
             "HIDDEN" => $arCurrentValues['IS_FILE'] === "Y" ? "N" : "Y",
         ],
         "FILE_SIZE" => [
             "PARENT" => "FILE_DATA",
-            "NAME" => 'Размер загружаемого файла, Мб',
+            "NAME" => Loc::getMessage('FILE_SIZE_NAME'),
             "TYPE" => "STRING",
             "DEFAULT" => "10",
             "HIDDEN" => $arCurrentValues['IS_FILE'] === "Y" ? "N" : "Y",
         ],
         "FILE_TYPE" => [
             "PARENT" => "FILE_DATA",
-            "NAME" => "Тип загружаемого файла",
+            "NAME" => Loc::getMessage('FILE_TYPE_NAME'),
             "TYPE" => "LIST",
             "MULTIPLE" => "Y",
             "SIZE" => "5",
@@ -200,7 +203,7 @@ $arComponentParameters = [
         ],
         "FILE_FIELD_CODE" => [
             "PARENT" => "FILE_DATA",
-            "NAME" => 'Код свойства инфоблока для сохранения файла',
+            "NAME" => Loc::getMessage('FILE_FIELD_CODE_NAME'),
             "TYPE" => "STRING",
             "DEFAULT" => "",
             "HIDDEN" => $arCurrentValues['IS_FILE'] === "Y" ? "N" : "Y",
@@ -208,55 +211,64 @@ $arComponentParameters = [
 
         "IS_POLITICS" => [
             "PARENT" => "AGREE",
-            "NAME" => 'Добавить чекбокс согласия с политикой конфиденциальности',
+            "NAME" => Loc::getMessage('IS_POLITICS_NAME'),
             "TYPE" => "CHECKBOX",
             "DEFAULT" => "Y",
             "REFRESH" => "Y",
         ],
         "POLITICS_TEXT" => [
             "PARENT" => "AGREE",
-            "NAME" => "Текст согласия с политикой конфиденциальности",
+            "NAME" => Loc::getMessage('POLITICS_TEXT_NAME'),
             "HIDDEN" => $arCurrentValues['IS_POLITICS'] === "Y" ? "N" : "Y",
-            "TYPE" => "STRING"
+            "TYPE" => "STRING",
+            "DEFAULT" => "Согласен на обработку политики конфиденциальности"
         ],
         "IS_AGREE" => [
             "PARENT" => "AGREE",
-            "NAME" => 'Добавить чекбокс согласия с обработкой персональных данных',
+            "NAME" => Loc::getMessage('IS_AGREE_NAME'),
             "TYPE" => "CHECKBOX",
             "DEFAULT" => "Y",
             "REFRESH" => "Y",
         ],
         "AGREE_TEXT" => [
             "PARENT" => "AGREE",
-            "NAME" => "Текст согласия с обработкой персональных данных",
+            "NAME" => Loc::getMessage('AGREE_TEXT_NAME'),
             "HIDDEN" => $arCurrentValues['IS_AGREE'] === "Y" ? "N" : "Y",
-            "TYPE" => "STRING"
+            "TYPE" => "STRING",
+            "DEFAULT" => "Согласен на обработку персональных данных"
         ],
         "IS_BOOTSTRAP" => [
             "PARENT" => "FIELDS",
-            "NAME" => 'Подключить Bootstrap 5',
+            "NAME" => Loc::getMessage('IS_BOOTSTRAP_NAME'),
             "TYPE" => "CHECKBOX",
             "DEFAULT" => "Y",
         ],
         "IS_ANTISPAM" => [
             "PARENT" => "FIELDS",
-            "NAME" => 'Включить антиспам',
+            "NAME" => Loc::getMessage('IS_ANTISPAM_NAME'),
             "TYPE" => "CHECKBOX",
             "DEFAULT" => "Y",
         ],
         "IS_SEND_EMAIL" => [
             "PARENT" => "ADDITIONAL",
-            "NAME" => 'Отправлять письмо',
+            "NAME" => Loc::getMessage('IS_SEND_EMAIL_NAME'),
             "TYPE" => "CHECKBOX",
             "DEFAULT" => "Y",
             "REFRESH" => "Y",
         ],
         "EVENT_NAME" => [
             "PARENT" => "ADDITIONAL",
-            "NAME" => "Почтовое событие вместо установленного модулем",
+            "NAME" => Loc::getMessage('EVENT_NAME_NAME'),
             "HIDDEN" => $arCurrentValues['IS_SEND_EMAIL'] === "Y" ? "N" : "Y",
             "TYPE" => "STRING",
             "DEFAULT" => "",
+        ],
+        "EMAIL_TO" => [
+            "PARENT" => "ADDITIONAL",
+            "NAME" => Loc::getMessage('EMAIL_TO_NAME'),
+            "TYPE" => "STRING",
+            "DEFAULT" => "",
+            "HIDDEN" => $arCurrentValues['IS_SEND_EMAIL'] === "Y" ? "N" : "Y",
         ],
     ],
 ];
