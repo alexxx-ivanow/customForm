@@ -1,8 +1,10 @@
 if (typeof custom_form === "undefined") {
     let custom_form = {
         prefix: "CF_",
+        form_selector: ".jsCustomForm",
+        result_selector: ".jsCustomResult",
         getForms() {
-            return document.querySelectorAll('.jsCustomForm');
+            return document.querySelectorAll(this.form_selector);
         },
         getPrefix() {
             return this.prefix;
@@ -14,15 +16,21 @@ if (typeof custom_form === "undefined") {
             return form.querySelector('[name=' + this.prefix + key);
         },
         getResultWrap(form) {
-            return form.querySelector('.jsCustomResult');
+            return form.querySelector(this.result_selector);
         },
         setSuccessNotification(response, result) {
-            let success = response;
             let successHtml = '';
-            success.forEach(function (item, i) {
+            response.forEach(function (item, i) {
                 successHtml += '<p>' + item + '</p>';
             });
-            result.innerHTML = '<div class="custom_result_success">' + successHtml + '</div>';
+            result.innerHTML = '<span class="custom_result_success">' + successHtml + '</span>';
+        },
+        setFailureNotification(response, result) {
+            let failureHtml = '';
+            response.forEach(function (item, i) {
+                failureHtml += '<p>' + item + '</p>';
+            });
+            result.innerHTML = '<span class="custom_result_error">' + failureHtml + '</span>';
         },
         clearSpanErrors(form) {
             let span_errors = form.querySelectorAll('.' + this.prefix + 'form_error');
@@ -31,7 +39,7 @@ if (typeof custom_form === "undefined") {
             });
         },
         clearInputErrors(form) {
-            let form_inputs = form.querySelectorAll('.jsCustomForm input, .jsCustomForm textarea');
+            let form_inputs = form.querySelectorAll('input, textarea');
             form_inputs.forEach(function (item) {
                 item.classList.remove('error');
             });
@@ -51,32 +59,32 @@ if (typeof custom_form === "undefined") {
 
     document.addEventListener('DOMContentLoaded', function(){
 
-        // добавляем антиспам
-        let inputs = document.querySelectorAll('input');
-        inputs.forEach(function (input) {
-            input.addEventListener('focus', function() {
-                let objForm = input.closest('form');
-                if(objForm != null) {
-                    let regAttribute = objForm.getAttribute('data-register');
-                    if(regAttribute !== null) {
+        let forms = custom_form.getForms();
+        forms.forEach(function (currentValue, currentIndex, listObj) {
+
+            // добавляем антиспам
+            let regAttribute = currentValue.getAttribute('data-register');
+            if(regAttribute !== null) {
+                let inputs = currentValue.querySelectorAll('input');
+                inputs.forEach(function (input) {
+                    input.addEventListener('focus', function() {
                         let nodeInput = document.createElement("input");
                         nodeInput.setAttribute('type', 'hidden');
                         nodeInput.setAttribute('name', custom_form.getPrefix() + 'B_FIELD');
-                        nodeInput.setAttribute('value', objForm.getAttribute('data-register'));
-                        objForm.prepend(nodeInput);
-                        objForm.removeAttribute('data-register');
-                    }
-                }
-            });
-        });
+                        nodeInput.setAttribute('value', regAttribute);
+                        currentValue.prepend(nodeInput);
+                        currentValue.removeAttribute('data-register');
+                    });
+                });
+            }
 
-        let forms = custom_form.getForms();
-        forms.forEach(function (currentValue, currentIndex, listObj) {
+            // отправка формы
             currentValue.onsubmit = async (e) => {
                 e.preventDefault();
 
                 let formData = new FormData(currentValue);
                 let result = custom_form.getResultWrap(currentValue);
+                let success = false;
 
                 var httpRequest = new XMLHttpRequest();
                 httpRequest.responseType = "json";
@@ -87,13 +95,15 @@ if (typeof custom_form === "undefined") {
 
                 httpRequest.onreadystatechange = function(){
                     if ( this.readyState == 4 && this.status == 200 ) {
-                        result.innerHTML = "";
 
+                        // сбрасываем поля валидации и оповещение
+                        if(result !== null) {
+                            result.innerHTML = "";
+                        }
                         custom_form.clearSpanErrors(currentValue);
                         custom_form.clearInputErrors(currentValue);
 
-                        //console.log(this.response);
-
+                        // если есть ошибки, выдаем предупреждения полям
                         if (Object.keys(this.response.ERRORS).length !== 0) {
                             let error = this.response.ERRORS;
                             for (var key in error) {
@@ -107,37 +117,31 @@ if (typeof custom_form === "undefined") {
                                         input.classList.add('error');
                                     }
                                 } else {
-                                    console.log('Неизвестный ключ: ' + key);
+                                    console.log('Unknown key: ' + key);
                                 }
                             }
-
-                            const cf_event = new CustomEvent("cf_success", {
-                                detail: {
-                                    //bubbles: true,
-                                    //cancelable: true,
-                                    message: this.response.MESSAGE,
-                                    success: false,
-                                    errors: this.response.ERRORS
-                                }
-                            });
-                            document.dispatchEvent(cf_event);
-
-                        } else {
+                            if(result !== null) {
+                                custom_form.setFailureNotification(this.response.MESSAGE, result);
+                            }
+                        } else { // успешная отправка
                             custom_form.clearForm(currentValue);
-                            custom_form.setSuccessNotification(this.response.MESSAGE, result);
-
-                            const cf_event = new CustomEvent("cf_success", {
-                                detail: {
-                                    //bubbles: true,
-                                    //cancelable: true,
-                                    message: this.response.MESSAGE,
-                                    success: true,
-                                    errors: []
-                                }
-                            });
-                            document.dispatchEvent(cf_event);
-
+                            if(result !== null) {
+                                custom_form.setSuccessNotification(this.response.MESSAGE, result);
+                            }
+                            success = true;
                         }
+
+                        // генерируем событие на отправку формы
+                        const cf_event = new CustomEvent("cf_complete", {
+                            detail: {
+                                cancelable: true,
+                                message: this.response.MESSAGE,
+                                success: success,
+                                form: currentValue,
+                                errors: this.response.ERRORS
+                            }
+                        });
+                        document.dispatchEvent(cf_event);
                     }
                 };
                 httpRequest.send(formData);
