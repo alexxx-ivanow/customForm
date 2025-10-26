@@ -147,8 +147,15 @@ $arComponentParameters = [
                 "NAME" => "ФИО",
                 "EMAIL" => "E-mail",
                 "PHONE" => "Телефон",
+                "COMMENT" => "Комментарий",
             ]),
-            "DEFAULT" => "NAME,EMAIL,PHONE",
+            "DEFAULT" => "NAME,EMAIL,PHONE,COMMENT",
+        ],
+        "FIELD_COMMENT_TO_END" => [
+            "PARENT" => "FIELDS",
+            "NAME" => Loc::getMessage('FIELD_COMMENT_TO_END_NAME'),
+            "TYPE" => "CHECKBOX",
+            "DEFAULT" => "Y",
         ],
         "IS_PHONE_MASK" => [
             "PARENT" => "FIELDS",

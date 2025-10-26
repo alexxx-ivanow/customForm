@@ -19,7 +19,7 @@
 .CF_form_error.form-text {
     color: red;
 }
-.form_input.error,
+.custom_form input.error,
 input[type=checkbox].error {
     border-color:red;
 }

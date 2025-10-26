@@ -1,6 +1,7 @@
 <?php
 
 use Bitrix\Main\HttpResponse,
+    Bitrix\Main\Application,
     Bitrix\Main\Page\Asset,
     Bitrix\Main\Localization\Loc,
     Bitrix\Main\Mail\Internal\EventTypeTable,
@@ -16,17 +17,19 @@ Loader::includeModule('abcwww.customform');
 class CustomFormComponent extends CBitrixComponent
 {
 
-    private $fields = [];
-
-    public $post = [];
-
-    public $files = [];
-
+    private $post = [];
+    private $files = [];
+    private object $server;
     private static $fieldPrefix = 'CF_';
     private static $eventName = 'ABCWWW_CUSTOM_FORM_FILLING';
+    private $fields = [];
 
     public function executeComponent()
     {
+
+        $context = Application::getInstance()->getContext();
+        $this->server = $context->getServer();
+
         // Уникальный ID формы
         $this->arParams['FORM_ID'] = "CF_" . md5($this->arParams['FORM_TITLE']);
 
@@ -35,12 +38,30 @@ class CustomFormComponent extends CBitrixComponent
         $this->arResult['MESSAGE'] = [];
         $this->arResult['ERRORS'] = [];
         $this->arResult['ALIASES'] = [];
-        $this->arResult['EXCLUDE'] = [];
         $this->arResult['BOT_CODE'] = ($this->arParams['IS_ANTISPAM'] === 'Y') ? AntiSpam::getBotValue() : '';
         $this->arResult['IS_COMMENT'] = false;
 
-        // подключаем дефолтные стили и скрипты
-        Asset::getInstance()->addCss($this->getPath() . '/lib/css/style.css');
+        // задаем имена предустановленных полей
+        $this->arResult['INPUT_FILE_NAME'] = self::$fieldPrefix . 'FILE';
+        $this->arResult['INPUT_COMMENT_NAME'] = self::$fieldPrefix . 'COMMENT';
+        $this->arResult['INPUT_AGREE_NAME'] = self::$fieldPrefix . 'AGREE';
+        $this->arResult['INPUT_POLITICS_NAME'] = self::$fieldPrefix . 'POLITICS';
+
+        // служебные атрибуты формы
+        $this->arResult['FORM_ATTRIBUTES'] = ' method="post" action="' . $this->request->getRequestUri() . '"';
+        if ($this->arParams['IS_ANTISPAM'] === 'Y') {
+            $this->arResult['FORM_ATTRIBUTES'] .= ' data-register="' . $this->arResult['BOT_CODE'] . '"';
+        }
+        if ($this->arParams['IS_FILE'] === 'Y') {
+            $this->arResult['FORM_ATTRIBUTES'] .= '   enctype="multipart/form-data"';
+        }
+
+        // скрытые служебные инпуты
+        $this->arResult['FORM_HIDDENS'] = bitrix_sessid_post() . PHP_EOL .
+    '<input type="hidden" name="' . $this->arResult['FIELD_PREFIX'] . 'ACTION" value="' . $this->arParams['FORM_ID']
+            . '">';
+
+        // подключаем дефолтный js
         Asset::getInstance()->addJs($this->getPath() . '/lib/js/script.js');
 
         // включение маски телефона
@@ -57,7 +78,7 @@ class CustomFormComponent extends CBitrixComponent
             $this->post[$key] = strip_tags(htmlspecialchars($row));
         }
 
-        // обрабатываем значения параметров
+        // обрабатываем значения параметра полей формы
         foreach ($this->arParams['FIELDS'] as $key => $field) {
 
             // определяем названия полей (либо из параметра, лмбо из ланговых файлов)
@@ -70,9 +91,8 @@ class CustomFormComponent extends CBitrixComponent
             }
 
             // если в параметрах задано поле комментария
-            if ($field === 'COMMENT') {
+            if ($this->arParams['FIELD_COMMENT_TO_END'] === 'Y' && $field === 'COMMENT') {
                 $this->arResult['IS_COMMENT'] = true;
-                $this->arResult['EXCLUDE'][] = 'COMMENT';
             }
 
             // убираем пустые значения
@@ -179,12 +199,15 @@ class CustomFormComponent extends CBitrixComponent
         }
 
         if (!count($this->arResult['ERRORS'])) { // если нет ошибок
+
+            // отправляем Email
             if ($this->arParams['IS_SEND_EMAIL'] === 'Y') {
-                $this->sendEmail(); // отправляем Email
+                $this->sendEmail();
             }
 
+            // делаем запись в инфоблок
             if ((int)$this->arParams['IBLOCK_ID']) {
-                $this->writeToIblock(); // делаем запись в инфоблок
+                $this->writeToIblock();
             }
 
             $this->arResult['MESSAGE'][] = $this->arParams['SUCCESS_TEXT'] ?: Loc::getMessage('FORM_MESSAGE_SUCCESS');
@@ -228,6 +251,13 @@ class CustomFormComponent extends CBitrixComponent
                 }
 
             }
+
+            // добавляем страницу отправки формы
+            $totalMessage .= PHP_EOL . 'Страница, с которой отправлена форма: ' . ($this->request->isHttps() ? "https://" : "http://") . $this->server->getHttpHost() . $this->server->getRequestUri();
+
+            $totalMessage .= PHP_EOL . 'Название формы: ' . $this->getFormTitle();
+
+
             $data['MESSAGE'] = $totalMessage;
 
             // почта получателя из настроек
@@ -246,6 +276,11 @@ class CustomFormComponent extends CBitrixComponent
         }
     }
 
+    private function getFormTitle()
+    {
+        return ($this->arParams['FORM_TITLE']) ?: '';
+    }
+
     private function writeToIblock()
     {
         Loader::includeModule('iblock');
@@ -258,21 +293,24 @@ class CustomFormComponent extends CBitrixComponent
             }            
         }
 
-        $PROP = [];
+        // добавляем страницу, с которой была отправлена форма
+        $messageArr[] = 'Страница, с которой отправлена форма: ' . ($this->request->isHttps() ? "https://" : "http://") . $this->server->getHttpHost() . $this->server->getRequestUri();
+
+        $PROPS = [];
         // грузим файл в инфоблок
         if ($this->arParams['IS_FILE'] && count($this->files) && $this->arParams['FILE_FIELD_CODE']) {
             foreach ($this->files as $key => $file) {
-                $PROP[$this->arParams['FILE_FIELD_CODE']] = $file;
+                $PROPS[$this->arParams['FILE_FIELD_CODE']] = $file;
             }
         }
 
-        $formTitle = ($this->arParams['FORM_TITLE']) ? ('[ ' . $this->arParams['FORM_TITLE'] . ' ]') : '';
         $arLoadProductArray = [
             "IBLOCK_SECTION_ID" => false, // элемент лежит в корне раздела
             "IBLOCK_ID" => $this->arParams['IBLOCK_ID'],
-            "NAME" => "Форма " . $formTitle . " заполнена " . date('Y-m-d H:i:s'),
+            //"NAME" => "Форма " . $formTitle . " заполнена " . date('Y-m-d H:i:s'),
+            "NAME" => "Форма [ " . $this->getFormTitle() . " ] заполнена " . date('Y-m-d H:i:s'),
             "ACTIVE" => "N",
-            "PROPERTY_VALUES" => $PROP,
+            "PROPERTY_VALUES" => $PROPS,
             "PREVIEW_TEXT" => implode(PHP_EOL, $messageArr),
         ];
         if (!$el->Add($arLoadProductArray)) {

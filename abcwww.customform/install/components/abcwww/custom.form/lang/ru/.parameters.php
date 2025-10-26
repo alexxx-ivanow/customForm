@@ -12,6 +12,7 @@ $MESS['FORM_TITLE_NAME'] = 'Название формы (обязательно 
 $MESS['FIELDS_NAME'] = 'Список полей для формы';
 $MESS['REQUIRED_NAME'] = 'Обязательные поля';
 $MESS['FIELDS_ORDER_NAME'] = 'Сортировка полей';
+$MESS['FIELD_COMMENT_TO_END_NAME'] = 'Вывести поле комментария после остальных полей';
 $MESS['IS_PHONE_MASK_NAME'] = 'Включить маску для поля телефона';
 $MESS['SUCCESS_TEXT_NAME'] = 'Сообщение об успешной отправке';
 $MESS['ERROR_TEXT_NAME'] = 'Сообщение при ошибке отправки формы';
