@@ -14,6 +14,7 @@ $MESS['REQUIRED_NAME'] = 'Обязательные поля';
 $MESS['FIELDS_ORDER_NAME'] = 'Сортировка полей';
 $MESS['FIELD_COMMENT_TO_END_NAME'] = 'Вывести поле комментария после остальных полей';
 $MESS['IS_PHONE_MASK_NAME'] = 'Включить маску для поля телефона';
+$MESS['BUTTON_TEXT_NAME'] = 'Надпись на кнопке отправки формы';
 $MESS['SUCCESS_TEXT_NAME'] = 'Сообщение об успешной отправке';
 $MESS['ERROR_TEXT_NAME'] = 'Сообщение при ошибке отправки формы';
 $MESS['IS_FILE_NAME'] = 'Добавить поле отправки файла';

@@ -163,6 +163,12 @@ $arComponentParameters = [
             "TYPE" => "CHECKBOX",
             "DEFAULT" => "Y",
         ],
+        "BUTTON_TEXT" => [
+            "PARENT" => "FIELDS",
+            "NAME" => Loc::getMessage('BUTTON_TEXT_NAME'),
+            "TYPE" => "STRING",
+            "DEFAULT" => "Отправить",
+        ],
         "SUCCESS_TEXT" => [
             "PARENT" => "FIELDS",
             "NAME" => Loc::getMessage('SUCCESS_TEXT_NAME'),

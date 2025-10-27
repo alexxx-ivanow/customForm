@@ -86,6 +86,6 @@ if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) die();
         </div>
     <? endif; ?>
 
-    <button type="submit" class="btn btn-primary" id="custom-form-button">Отправить</button>
+    <button type="submit" class="btn btn-primary" id="custom-form-button"><?=$arParams['BUTTON_TEXT']?></button>
     <div class="custom_result jsCustomResult"></div>
 </form>
