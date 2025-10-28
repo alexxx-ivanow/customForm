@@ -25,7 +25,7 @@ if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) die();
 
         <div class="mb-3">
             <label class="form-label">
-                <span class="form_caption"><?= Loc::getMessage($arResult['FIELD_PREFIX'] . $field . '_CAPTION') ?: $arResult['ALIASES'][$field] ?: $field?></span>
+                <span class="form_caption"><?= Loc::getMessage($arResult['FIELD_PREFIX'] . $field . '_CAPTION') ?: $arResult['ALIASES'][$field] ?: $field?><?if(in_array($field, $arParams['REQUIRED'])):?> *<?endif;?></span>
 
                 <?if($field === 'COMMENT'):?>
                     <textarea class="form_input form-control" placeholder="<?= Loc::getMessage($arResult['FIELD_PREFIX'] . $field . '_CAPTION') ?: $arResult['ALIASES'][$field] ?: $field?>"
@@ -33,8 +33,8 @@ if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) die();
                 <?else:?>
                     <input type="text" class="form_input form-control<? if ($field === 'PHONE' &&
                         $arParams['IS_PHONE_MASK'] === 'Y'): ?> jsCFTel<? endif; ?>"
-                           placeholder="<?= Loc::getMessage($arResult['FIELD_PREFIX'] . $field . '_CAPTION') ?: $arResult['ALIASES'][$field] ?: $field ?>"
-                           name="<?= $arResult['FIELD_PREFIX'] . $field ?>">
+                           placeholder="<?= Loc::getMessage($arResult['FIELD_PREFIX'] . $field . '_CAPTION') ?:
+                               $arResult['ALIASES'][$field] ?: $field ?>" name="<?= $arResult['FIELD_PREFIX'] . $field ?>">
                 <?endif;?>
 
                 <span class="form-text <?= $arResult['FIELD_PREFIX'] ?>form_error <?= $arResult['FIELD_PREFIX'] . $field ?>_error"></span>
@@ -46,7 +46,7 @@ if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) die();
     <? if ($arResult['IS_COMMENT'] && $arParams['FIELD_COMMENT_TO_END'] === 'Y'): ?>
         <div class="mb-3">
             <label class="form-label">
-                <span class="form_caption"><?= $arResult['ALIASES']['COMMENT'] ?: $arResult['INPUT_COMMENT_NAME'] ?></span>
+                <span class="form_caption"><?= $arResult['ALIASES']['COMMENT'] ?: $arResult['INPUT_COMMENT_NAME'] ?><?if(in_array('COMMENT', $arParams['REQUIRED'])):?> *<?endif;?></span>
                 <textarea class="form_input form-control" placeholder="<?= $arResult['ALIASES']['COMMENT'] ?: $arResult['INPUT_COMMENT_NAME'] ?>"
                           name="<?= $arResult['INPUT_COMMENT_NAME'] ?>"></textarea>
                 <span class="form-text <?= $arResult['FIELD_PREFIX'] ?>form_error <?= $arResult['INPUT_COMMENT_NAME'] ?>_error"></span>
@@ -57,7 +57,7 @@ if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) die();
     <? if ($arParams['IS_FILE'] === 'Y'): ?>
         <div class="mb-3">
             <label class="form-label">
-                <span class="form_caption">Загрузите файл</span>
+                <span class="form_caption">Загрузите файл<?if($arParams['FILE_REQUIRED']):?> *<?endif;?></span>
                 <input class="form-control" type="file" name="<?= $arResult['INPUT_FILE_NAME'] ?>">
                 <span class="form-text <?= $arResult['FIELD_PREFIX'] ?>form_error <?= $arResult['INPUT_FILE_NAME'] ?>_error"></span>
             </label>
