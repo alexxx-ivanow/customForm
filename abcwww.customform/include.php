@@ -1,11 +1,9 @@
 <?
-
 Bitrix\Main\Loader::registerAutoloadClasses(
-    "abcwww.customform",
-    [
+    "abcwww.customform", array(
         "abcwww\\customform\\Events" => "lib/Events.php",
         "abcwww\\customform\\AntiSpam" => "lib/AntiSpam.php",
         "abcwww\\customform\\Validate" => "lib/validators/Validate.php",
-    ]
+    )
 );
 ?>
