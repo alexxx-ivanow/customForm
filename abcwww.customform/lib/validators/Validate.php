@@ -50,3 +50,4 @@ class Validate
         return true;
     }
 }
+?>

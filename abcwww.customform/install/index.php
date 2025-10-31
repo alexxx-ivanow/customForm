@@ -1,29 +1,14 @@
 <?
-// пространство имен для подключений ланговых файлов
+
 use Bitrix\Main\Localization\Loc;
-
-// пространство имен для управления (регистрации/удалении) модуля в системе/базе
 use Bitrix\Main\ModuleManager;
-
-// пространство имен для работы с параметрами модулей хранимых в базе данных
 use Bitrix\Main\Config\Option;
-
-// пространство имен с абстрактным классом для любых приложений, любой конкретный класс приложения является наследником этого абстрактного класса
 use Bitrix\Main\Application;
-
-// пространство имен для работы c ORM
 use \Bitrix\Main\Entity\Base;
-
-// пространство имен для автозагрузки модулей
 use \Bitrix\Main\Loader;
-
-// пространство имен для событий
 use \Bitrix\Main\EventManager;
-
-// пространство имен для почтовых событий
 use abcwww\customform\Events;
 
-// подключение ланговых файлов
 Loc::loadMessages(__FILE__);
 
 class abcwww_customform extends CModule

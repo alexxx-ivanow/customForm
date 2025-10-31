@@ -1,8 +1,6 @@
 <?
-// пространство имен модуля
-namespace abcwww\customform;
 
-// install/version.php или в установочном скрипте модуля
+namespace abcwww\customform;
 
 use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\SiteTable;
@@ -83,7 +81,6 @@ class Events
             $id = $eventMessage->Add($fields);
             return $id;
         } catch (\Exception $e) {
-            // Логирование ошибки
             return false;
         }
     }
@@ -123,8 +120,8 @@ class Events
 
             return true;
         } catch (\Exception $e) {
-            // Логирование ошибки
             return false;
         }
     }
 }
+?>

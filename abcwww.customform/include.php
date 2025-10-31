@@ -1,6 +1,6 @@
 <?
+
 Bitrix\Main\Loader::registerAutoloadClasses(
-// имя модуля
     "abcwww.customform",
     [
         "abcwww\\customform\\Events" => "lib/Events.php",

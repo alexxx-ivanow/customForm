@@ -30,3 +30,4 @@ class AntiSpam
         return true;
     }
 }
+?>
