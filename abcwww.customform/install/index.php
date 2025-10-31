@@ -245,3 +245,4 @@ class abcwww_Customform extends CModule
         return true;
     }
 }
+?>

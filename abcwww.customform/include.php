@@ -8,3 +8,4 @@ Bitrix\Main\Loader::registerAutoloadClasses(
         "abcwww\\customform\\Validate" => "lib/validators/Validate.php",
     ]
 );
+?>
