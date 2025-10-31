@@ -26,7 +26,7 @@ use abcwww\customform\Events;
 // подключение ланговых файлов
 Loc::loadMessages(__FILE__);
 
-class abcwww_Customform extends CModule
+class abcwww_customform extends CModule
 {
     // переменные модуля
     public $MODULE_ID;
