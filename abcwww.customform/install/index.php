@@ -61,7 +61,7 @@ class abcwww_customform extends CModule
         // регистрируем модуль в системе
         ModuleManager::RegisterModule("abcwww.customform");
         // создаем таблицы баз данных, необходимые для работы модуля
-        //$this->InstallDB();
+        $this->InstallDB();
         // создаем первую и единственную запись в БД
         //$this->addData();
         // регистрируем обработчики событий
@@ -80,7 +80,7 @@ class abcwww_customform extends CModule
     {
         global $APPLICATION;
         // удаляем таблицы баз данных, необходимые для работы модуля
-        //$this->UnInstallDB();
+        $this->UnInstallDB();
         // удаляем обработчики событий
         $this->UnInstallEmailEvents();
         // удаляем файлы, необходимые для работы модуля
@@ -98,32 +98,13 @@ class abcwww_customform extends CModule
     // метод для создания таблицы баз данных
     function InstallDB()
     {
-        // подключаем модуль для того что бы был видем класс ORM
-        Loader::includeModule($this->MODULE_ID);
-        // через класс Application получаем соединение по переданному параметру, параметр берем из ORM-сущности (он указывается, если необходим другой тип подключения, отличный от default), если тип подключения по умолчанию, то параметр можно не передавать. Далее по подключению вызываем метод isTableExists, в который передаем название таблицы полученное с помощью метода getDBTableName() класса Base
-        if (!Application::getConnection(\Hmarketing\d7\DataTable::getConnectionName())->isTableExists(Base::getInstance("\abcwww\customform\DataTable")->getDBTableName())) {
-            // eсли таблицы не существует, то создаем её по ORM сущности
-            Base::getInstance("\abcwww\customform\DataTable")->createDbTable();
-        }
-
-        if (!Application::getConnection(\Hmarketing\d7\DataTable::getConnectionName())->isTableExists(Base::getInstance("\abcwww\d7\customform")->getDBTableName())) {
-            // eсли таблицы не существует, то создаем её по ORM сущности
-            Base::getInstance("\abcwww\customform\AuthorTable")->createDbTable();
-        }
+        //
     }
 
     // метод для удаления таблицы баз данных
     function UnInstallDB()
     {
-        // подключаем модуль для того что бы был видем класс ORM
-        Loader::includeModule($this->MODULE_ID);
-        // делаем запрос к бд на удаление таблицы, если она существует, по подключению к бд класса Application с параметром подключения ORM сущности
-        Application::getConnection(\abcwww\customform\DataTable::getConnectionName())->queryExecute('DROP TABLE IF EXISTS ' . Base::getInstance("\abcwww\customform\DataTable")->getDBTableName());
-
-        Application::getConnection(\abcwww\customform\DataTable::getConnectionName())->queryExecute('DROP TABLE IF EXISTS ' . Base::getInstance("\abcwww\customform\AuthorTable")->getDBTableName());
-
-        // удаляем параметры модуля из базы данных битрикс
-        Option::delete($this->MODULE_ID);
+        //
     }
 
     // метод для установки почтовых событий и шаблонов
