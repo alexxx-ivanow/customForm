@@ -48,7 +48,7 @@ class CustomFormComponent extends CBitrixComponent
         $this->arResult['INPUT_POLITICS_NAME'] = self::$fieldPrefix . 'POLITICS';
 
         // служебные атрибуты формы
-        $this->arResult['FORM_ATTRIBUTES'] = ' method="post" action="' . $this->request->getRequestUri() . '"';
+        $this->arResult['FORM_ATTRIBUTES'] = ' method="post" action="' . htmlspecialchars($this->request->getRequestUri()) . '"';
         if ($this->arParams['IS_ANTISPAM'] === 'Y') {
             $this->arResult['FORM_ATTRIBUTES'] .= ' data-register="' . $this->arResult['BOT_CODE'] . '"';
         }
