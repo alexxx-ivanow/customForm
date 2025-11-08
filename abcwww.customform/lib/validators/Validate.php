@@ -15,7 +15,7 @@ class Validate
 
     private static function validateEmail(string $email = '')
     {
-        if (!preg_match("/^([a-z0-9_-]+\.)*[a-z0-9_-]+@[a-z0-9_-]+(\.[a-z0-9_-]+)*\.[a-z]{2,6}$/i", $email)) {
+        if ($email && !preg_match("/^([a-z0-9_-]+\.)*[a-z0-9_-]+@[a-z0-9_-]+(\.[a-z0-9_-]+)*\.[a-z]{2,6}$/i", $email)) {
             return false;
         }
         return true;
@@ -23,7 +23,7 @@ class Validate
 
     private static function validatePhone(string $phone = '')
     {
-        if (!preg_match('/^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$/', self::clearCharPhone($phone))) {
+        if ($phone && !preg_match('/^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$/', self::clearCharPhone($phone))) {
             return false;
         }
         return true;

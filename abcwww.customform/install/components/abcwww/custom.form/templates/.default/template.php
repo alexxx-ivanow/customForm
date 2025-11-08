@@ -57,7 +57,7 @@ if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) die();
     <? if ($arParams['IS_FILE'] === 'Y'): ?>
         <div class="mb-3">
             <label class="form-label">
-                <span class="form_caption">Загрузите файл<?if($arParams['FILE_REQUIRED']):?> *<?endif;?></span>
+                <span class="form_caption">Загрузите файл<?if($arParams['FILE_REQUIRED'] === 'Y'):?> *<?endif;?></span>
                 <input class="form-control" type="file" name="<?= $arResult['INPUT_FILE_NAME'] ?>">
                 <span class="form-text <?= $arResult['FIELD_PREFIX'] ?>form_error <?= $arResult['INPUT_FILE_NAME'] ?>_error"></span>
             </label>
