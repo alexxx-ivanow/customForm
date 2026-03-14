@@ -11,7 +11,7 @@ $this->setFrameMode(true);
         <div class="row h-100 align-items-center justify-content-center text-center">
             <div class="col-lg-10 align-self-end">
                 <h2 class="text-uppercase font-weight-bold">
-                    <?= $arParams['FORM_TITLE'] . ' - ' . $arParams['FORM_ID']?>
+                    <?= $arParams['FORM_TITLE']?>
                 </h2>
             </div>
         </div>
