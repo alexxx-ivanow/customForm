@@ -152,10 +152,26 @@ if (typeof AbcwwwMaskPhone === "undefined") {
         };
     };
 
-    document.addEventListener('DOMContentLoaded', function(){
-        let jsTels = document.querySelectorAll('.jsCFTel');
+    function initMaskedPhones(context) {
+        context = context || document;
+
+        let jsTels = context.querySelectorAll('.jsCFTel');
         jsTels.forEach(function (value) {
             AbcwwwMaskPhone.init(value, '+7 (999) 999-99-99', false);
         });
-    });
+    }
+
+    if (window.BX) {
+        BX.ready(function () {
+            initMaskedPhones(document);
+        });
+
+        BX.addCustomEvent('onFrameDataReceived', function () {
+            initMaskedPhones(document);
+        });
+    } else {
+        document.addEventListener('DOMContentLoaded', function () {
+            initMaskedPhones(document);
+        });
+    }
 }

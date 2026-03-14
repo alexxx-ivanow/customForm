@@ -3,6 +3,7 @@
 use Bitrix\Main\Localization\Loc;
 
 if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) die();
+$this->setFrameMode(true);
 ?>
 
 <? if ($arParams['FORM_TITLE']): ?>
@@ -10,12 +11,17 @@ if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) die();
         <div class="row h-100 align-items-center justify-content-center text-center">
             <div class="col-lg-10 align-self-end">
                 <h2 class="text-uppercase font-weight-bold">
-                    <?= $arParams['FORM_TITLE'] ?>
+                    <?= $arParams['FORM_TITLE'] . ' - ' . $arParams['FORM_ID']?>
                 </h2>
             </div>
         </div>
     </div>
 <? endif; ?>
+
+<?
+// Создаем динамическую зону для композита
+$frame = $this->createFrame('custom_form_' . $arParams['FORM_ID'])->begin();
+?>
 
 <form class="custom_form jsCustomForm" <?=$arResult['FORM_ATTRIBUTES']?>>
     <?=$arResult['FORM_HIDDENS']?>
@@ -89,3 +95,6 @@ if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) die();
     <button type="submit" class="btn btn-primary" id="custom-form-button"><?=$arParams['BUTTON_TEXT']?></button>
     <div class="custom_result jsCustomResult"></div>
 </form>
+<?
+// Завершаем динамическую зону
+$frame->end();
