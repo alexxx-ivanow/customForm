@@ -31,7 +31,7 @@ class abcwww_customform extends CModule
         // создаем пустой массив для файла version.php
         $arModuleVersion = [];
         // подключаем файл version.php
-        include_once(__DIR__ . '/version.php');
+        include(__DIR__ . '/version.php');
 
         // версия модуля
         $this->MODULE_VERSION = $arModuleVersion['VERSION'];

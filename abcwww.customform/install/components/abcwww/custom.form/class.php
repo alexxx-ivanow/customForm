@@ -5,6 +5,8 @@ use Bitrix\Main\HttpResponse,
     Bitrix\Main\Page\Asset,
     Bitrix\Main\Localization\Loc,
     Bitrix\Main\Mail\Internal\EventTypeTable,
+    Bitrix\Main\Engine\ActionFilter,
+    Bitrix\Main\Engine\Contract\Controllerable,
     abcwww\customform\AntiSpam,
     abcwww\customform\Validate,
     Bitrix\Main\Loader,
@@ -14,7 +16,7 @@ if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) die();
 
 Loader::includeModule('abcwww.customform');
 
-class CustomFormComponent extends CBitrixComponent
+class CustomFormComponent extends CBitrixComponent implements Controllerable
 {
 
     private $post = [];
@@ -24,9 +26,26 @@ class CustomFormComponent extends CBitrixComponent
     private static $eventName = 'ABCWWW_CUSTOM_FORM_FILLING';
     private $fields = [];
 
+    public function configureActions()
+    {
+        return [
+            'getBotCode' => [
+                'prefilters' => [
+                    new ActionFilter\Csrf(),
+                ],
+            ],
+        ];
+    }
+
+    public function getBotCodeAction()
+    {
+        return [
+            'botCode' => AntiSpam::getBotValue(),
+        ];
+    }
+
     public function executeComponent()
     {
-
         $context = Application::getInstance()->getContext();
         $this->server = $context->getServer();
 
@@ -38,7 +57,7 @@ class CustomFormComponent extends CBitrixComponent
         $this->arResult['MESSAGE'] = [];
         $this->arResult['ERRORS'] = [];
         $this->arResult['ALIASES'] = [];
-        $this->arResult['BOT_CODE'] = ($this->arParams['IS_ANTISPAM'] === 'Y') ? AntiSpam::getBotValue() : '';
+        $this->arResult['BOT_CODE'] = ''; // больше не вшиваем живой токен в HTML при композите
         $this->arResult['IS_COMMENT'] = false;
 
         // задаем имена предустановленных полей
@@ -50,16 +69,16 @@ class CustomFormComponent extends CBitrixComponent
         // служебные атрибуты формы
         $this->arResult['FORM_ATTRIBUTES'] = ' method="post" action="' . htmlspecialchars($this->request->getRequestUri()) . '"';
         if ($this->arParams['IS_ANTISPAM'] === 'Y') {
-            $this->arResult['FORM_ATTRIBUTES'] .= ' data-register="' . $this->arResult['BOT_CODE'] . '"';
+            $this->arResult['FORM_ATTRIBUTES'] .= ' data-register=""';
         }
+        $this->arResult['FORM_ATTRIBUTES'] .= ' data-component-name="abcwww:custom.form"';
         if ($this->arParams['IS_FILE'] === 'Y') {
-            $this->arResult['FORM_ATTRIBUTES'] .= '   enctype="multipart/form-data"';
+            $this->arResult['FORM_ATTRIBUTES'] .= ' enctype="multipart/form-data"';
         }
 
         // скрытые служебные инпуты
         $this->arResult['FORM_HIDDENS'] = bitrix_sessid_post() . PHP_EOL .
-    '<input type="hidden" name="' . $this->arResult['FIELD_PREFIX'] . 'ACTION" value="' . $this->arParams['FORM_ID']
-            . '">';
+            '<input type="hidden" name="' . $this->arResult['FIELD_PREFIX'] . 'ACTION" value="' . $this->arParams['FORM_ID'] . '">';
 
         // подключаем дефолтный js
         Asset::getInstance()->addJs($this->getPath() . '/lib/js/script.js');
@@ -70,8 +89,9 @@ class CustomFormComponent extends CBitrixComponent
         }
 
         // поключаем Bootstrap
-        if ($this->arParams['IS_BOOTSTRAP'] === 'Y')
+        if ($this->arParams['IS_BOOTSTRAP'] === 'Y') {
             Asset::getInstance()->addCss($this->getPath() . '/lib/css/bootstrap.css');
+        }
 
         // предварительная санация входящих данных формы
         foreach ($this->request->getPostList()->toArray() as $key => $row) {
@@ -80,8 +100,7 @@ class CustomFormComponent extends CBitrixComponent
 
         // обрабатываем значения параметра полей формы
         foreach ($this->arParams['FIELDS'] as $key => $field) {
-
-            // определяем названия полей (либо из параметра, лмбо из ланговых файлов)
+            // определяем названия полей (либо из параметра, либо из ланговых файлов)
             if (strpos($field, '==') !== false) {
                 $tmpSplit = explode('==', $field);
                 $this->arResult['ALIASES'][$tmpSplit[0]] = $tmpSplit[1];
@@ -98,12 +117,13 @@ class CustomFormComponent extends CBitrixComponent
             // убираем пустые значения
             if (!$field) {
                 unset($this->arParams['FIELDS'][$key]);
-            } else { // если не пустое - добавляем в свойство $this->fields
+            } else {
+                // если не пустое - добавляем в свойство $this->fields
                 $this->fields[$this->arParams['FIELDS'][$key]] = $this->post[self::$fieldPrefix . $this->arParams['FIELDS'][$key]];
             }
         }
 
-        // убираем пустые значения в массиве обязательных полей REQUIRED (из-за доп полей в параметрах)
+        // убираем пустые значения в массиве обязательных полей REQUIRED
         foreach ($this->arParams['REQUIRED'] as $key => $field) {
             if (!$field) {
                 unset($this->arParams['REQUIRED'][$key]);

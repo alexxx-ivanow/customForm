@@ -18,11 +18,6 @@ $this->setFrameMode(true);
     </div>
 <? endif; ?>
 
-<?
-// Создаем динамическую зону для композита
-$frame = $this->createFrame('custom_form_' . $arParams['FORM_ID'])->begin();
-?>
-
 <form class="custom_form jsCustomForm" <?=$arResult['FORM_ATTRIBUTES']?>>
     <?=$arResult['FORM_HIDDENS']?>
 
@@ -95,6 +90,3 @@ $frame = $this->createFrame('custom_form_' . $arParams['FORM_ID'])->begin();
     <button type="submit" class="btn btn-primary" id="custom-form-button"><?=$arParams['BUTTON_TEXT']?></button>
     <div class="custom_result jsCustomResult"></div>
 </form>
-<?
-// Завершаем динамическую зону
-$frame->end();

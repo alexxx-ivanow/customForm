@@ -17,7 +17,7 @@ if (typeof custom_form === "undefined") {
         },
 
         getFormInput(key, form) {
-            return form.querySelector("[name=" + this.prefix + key + "]");
+            return form.querySelector('[name="' + this.prefix + key + '"]');
         },
 
         getResultWrap(form) {
@@ -27,7 +27,7 @@ if (typeof custom_form === "undefined") {
         setSuccessNotification(response, result) {
             let successHtml = "";
             response.forEach(function (item) {
-                successHtml += "<div class='customForm__success'>" + item + "</div>";
+                successHtml += "<div class='custom_result_success'>" + item + "</div>";
             });
             result.innerHTML = successHtml;
         },
@@ -35,7 +35,7 @@ if (typeof custom_form === "undefined") {
         setFailureNotification(response, result) {
             let failureHtml = "";
             response.forEach(function (item) {
-                failureHtml += "<div class='customForm__error'>" + item + "</div>";
+                failureHtml += "<div class='custom_result_error'>" + item + "</div>";
             });
             result.innerHTML = failureHtml;
         },
@@ -77,12 +77,23 @@ if (typeof custom_form === "undefined") {
             form.prepend(nodeInput);
         },
 
+        resetAntispam(form) {
+            form.dataset.cfAntispamInit = "";
+            form.removeAttribute("data-register-used");
+
+            let hidden = form.querySelector('[name="' + this.getPrefix() + 'B_FIELD"]');
+            if (hidden) {
+                hidden.remove();
+            }
+        },
+
         bindAntispam(form) {
             if (form.dataset.cfAntispamInit === "Y") return;
-            form.dataset.cfAntispamInit = "Y";
 
             let regAttribute = form.getAttribute("data-register");
-            if (regAttribute === null) return;
+            if (regAttribute === null || regAttribute === "") return;
+
+            form.dataset.cfAntispamInit = "Y";
 
             let controls = form.querySelectorAll("input, textarea, select");
             let self = this;
@@ -91,7 +102,9 @@ if (typeof custom_form === "undefined") {
                 control.addEventListener(
                     "focus",
                     function () {
-                        self.ensureAntispamField(form, regAttribute);
+                        let currentRegister = form.getAttribute("data-register");
+                        self.ensureAntispamField(form, currentRegister);
+                        form.setAttribute("data-register-used", "Y");
                         form.removeAttribute("data-register");
                     },
                     { once: true }
@@ -177,13 +190,50 @@ if (typeof custom_form === "undefined") {
             };
         },
 
+        refreshRegisterToken(form) {
+            if (!window.BX || !BX.ajax || !BX.ajax.runComponentAction) {
+                return Promise.resolve(false);
+            }
+
+            let componentName = form.getAttribute("data-component-name") || "abcwww:custom.form";
+
+            return BX.ajax.runComponentAction(componentName, "getBotCode", {
+                mode: "class"
+            }).then(function (response) {
+                if (response && response.data && typeof response.data.botCode !== "undefined") {
+                    form.setAttribute("data-register", response.data.botCode || "");
+                    return true;
+                }
+
+                return false;
+            }).catch(function (error) {
+                console.error("Can not refresh data-register", error);
+                return false;
+            });
+        },
+
+        initForm(form) {
+            let self = this;
+
+            self.bindSubmit(form);
+
+            return self.refreshRegisterToken(form).then(function (isUpdated) {
+                self.resetAntispam(form);
+
+                if (isUpdated) {
+                    self.bindAntispam(form);
+                } else {
+                    self.bindAntispam(form);
+                }
+            });
+        },
+
         init() {
             let self = this;
             let forms = self.getForms();
 
             forms.forEach(function (form) {
-                self.bindAntispam(form);
-                self.bindSubmit(form);
+                self.initForm(form);
             });
         },
     };
@@ -192,12 +242,12 @@ if (typeof custom_form === "undefined") {
         custom_form.init();
     }
 
-    if (window.frameCacheVars !== undefined && window.BX) {
-        BX.addCustomEvent("onFrameDataReceived", function () {
+    if (window.BX) {
+        BX.ready(function () {
             initCustomForm();
         });
-    } else if (window.BX) {
-        BX.ready(function () {
+
+        BX.addCustomEvent("onFrameDataReceived", function () {
             initCustomForm();
         });
     } else {
