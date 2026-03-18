@@ -122,6 +122,9 @@ if (typeof custom_form === "undefined") {
                 e.preventDefault();
 
                 let formData = new FormData(form);
+                if (window.BX && BX.bitrix_sessid) {
+                    formData.set('sessid', BX.bitrix_sessid());
+                }
                 let result = self.getResultWrap(form);
                 let success = false;
 
