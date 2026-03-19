@@ -27,3 +27,8 @@ input[type=checkbox].error {
 .custom_result_success {
     color: green;
 }
+
+button.cf-is-loading {
+    opacity: 0.6;
+    pointer-events: none;
+}

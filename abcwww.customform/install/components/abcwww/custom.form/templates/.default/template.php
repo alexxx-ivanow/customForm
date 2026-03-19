@@ -87,6 +87,6 @@ $this->setFrameMode(true);
         </div>
     <? endif; ?>
 
-    <button type="submit" class="btn btn-primary" id="custom-form-button"><?=$arParams['BUTTON_TEXT']?></button>
+    <button type="submit" class="btn btn-primary"><?=$arParams['BUTTON_TEXT']?></button>
     <div class="custom_result jsCustomResult"></div>
 </form>

@@ -121,6 +121,13 @@ if (typeof custom_form === "undefined") {
             form.onsubmit = async function (e) {
                 e.preventDefault();
 
+                let submitBtn = form.querySelector('[type="submit"]');
+
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('cf-is-loading'); // опционально
+                }
+
                 let formData = new FormData(form);
                 if (window.BX && BX.bitrix_sessid) {
                     formData.set('sessid', BX.bitrix_sessid());
@@ -186,11 +193,23 @@ if (typeof custom_form === "undefined") {
                         });
 
                         document.dispatchEvent(cf_event);
+
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.classList.remove('cf-is-loading');
+                        }
                     }
                 };
 
                 httpRequest.send(formData);
-            };
+
+                httpRequest.onerror = function () {
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.classList.remove('cf-is-loading');
+                    }
+                };
+            };            
         },
 
         refreshRegisterToken(form) {
