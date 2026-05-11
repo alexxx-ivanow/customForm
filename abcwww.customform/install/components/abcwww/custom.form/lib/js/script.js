@@ -214,6 +214,7 @@ if (typeof custom_form === "undefined") {
 
         refreshRegisterToken(form) {
             if (!window.BX || !BX.ajax || !BX.ajax.runComponentAction) {
+                alert('Не подключен js-функционал ядра битрикса, антиспам формы CustomForm работать не будет, отключите его в настройках компонента'); 
                 return Promise.resolve(false);
             }
 
