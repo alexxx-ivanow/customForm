@@ -8,8 +8,10 @@ $MESS['ERROR_BOT_FIELD'] = 'Попытка взлома';
 $MESS['ERROR_VALIDATE_FIELD_EMAIL'] = 'Значение email указано неверно';
 $MESS['ERROR_VALIDATE_FIELD_PHONE'] = 'Номер телефона указан неверно';
 
+$MESS['ERROR_VALIDATE_FIELD_FILE'] = 'Ошибка загрузки файла';
 $MESS['ERROR_VALIDATE_FIELD_FILE_SIZE'] = 'Недопустимый размер файла';
 $MESS['ERROR_VALIDATE_FIELD_FILE_TYPE'] = 'Неверный тип файла';
+$MESS['ERROR_VALIDATE_FIELD_FILE_TYPE_EMPTY'] = 'Не выбран обязательный тип файла';
 
 $MESS['FORM_MESSAGE_SUCCESS'] = 'Сообщение успешно отправлено';
 $MESS['FORM_MESSAGE_ERROR'] = 'Ошибка при отправке сообщения';
