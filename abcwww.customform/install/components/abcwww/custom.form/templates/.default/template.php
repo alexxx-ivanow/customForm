@@ -55,11 +55,16 @@ $this->setFrameMode(true);
         </div>
     <? endif; ?>
 
-    <? if ($arParams['IS_FILE'] === 'Y'): ?>
+    <? if ($arParams['IS_FILE'] === 'Y' && !empty($arParams['FILE_TYPE'])): ?>
         <div class="mb-3">
             <label class="form-label">
-                <span class="form_caption">Загрузите файл<?if($arParams['FILE_REQUIRED'] === 'Y'):?> *<?endif;?></span>
+                <span class="form_caption"><?= Loc::getMessage('UPLOAD_FILE')?><?if($arParams['FILE_REQUIRED'] === 'Y'):?> *<?endif;?></span>
                 <input class="form-control" type="file" name="<?= $arResult['INPUT_FILE_NAME'] ?>">
+
+                <?if(!empty($arResult['ALLOW_FILE_TYPES'])):?>
+                    <p class="form_caption form_caption--add"><?= Loc::getMessage('ALLOW_FILE_TYPES')?> <?=implode(', ', $arResult['ALLOW_FILE_TYPES']);?></p>
+                <?endif;?>
+
                 <span class="form-text <?= $arResult['FIELD_PREFIX'] ?>form_error <?= $arResult['INPUT_FILE_NAME'] ?>_error"></span>
             </label>
         </div>

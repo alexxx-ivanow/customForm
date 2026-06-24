@@ -1,4 +1,4 @@
-<?
+<?php
 $MESS['INSTALL_TITLE'] = 'Установка модуля';
 $MESS['INSTALL_TITLE_STEP_1'] = 'Установка модуля шаг 1';
 $MESS['INSTALL_TITLE_STEP_2'] = 'Установка модуля шаг 2';

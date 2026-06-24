@@ -1,4 +1,4 @@
-<?
+<?php
 Bitrix\Main\Loader::registerAutoloadClasses(
     "abcwww.customform", array(
         "abcwww\\customform\\Events" => "lib/Events.php",

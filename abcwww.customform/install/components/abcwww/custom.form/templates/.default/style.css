@@ -32,3 +32,9 @@ button.cf-is-loading {
     opacity: 0.6;
     pointer-events: none;
 }
+
+.form_caption--add {
+    font-size: 13px;
+    color: #898383;
+    margin: 3px 0 0;
+}

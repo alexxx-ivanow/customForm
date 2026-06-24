@@ -143,6 +143,37 @@ class CustomFormComponent extends CBitrixComponent implements Controllerable
             array_unshift($this->arParams['FIELDS'], $field);
         }
 
+        // Если не указан FILE_TYPE, ставим по умолчанию image/jpeg                                       
+        if (
+            !is_array($this->arParams['FILE_TYPE']) ||
+            !count($this->arParams['FILE_TYPE'])
+        ) {
+
+            $this->arParams['FILE_TYPE'] = [
+                "image/jpeg"
+            ];        
+        }
+
+        // получаем разрешенные к загрузке типы файлов
+        $fileTypeValues = [
+            "image/jpeg" => "JPG",
+            "image/png" => "PNG",
+            "application/pdf" => "PDF",
+            "text/plain" => "TXT",
+            "application/vnd.ms-excel" => "XLS",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" => "XLSX",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document" => "DOCX",
+        ];
+
+        $allowFileTypes = [];
+        foreach($this->arParams['FILE_TYPE'] as $fileTypeParamsValue) {
+            if(!empty($fileTypeValues[$fileTypeParamsValue])) {
+                $allowFileTypes[] = mb_strtolower($fileTypeValues[$fileTypeParamsValue]);
+            }
+            
+        }
+        $this->arResult['ALLOW_FILE_TYPES'] = $allowFileTypes;
+
         // если приходит ajax-запрос
         if ($this->request->isAjaxRequest()) {
             $this->manageRequest();
@@ -196,24 +227,57 @@ class CustomFormComponent extends CBitrixComponent implements Controllerable
         if ($this->arParams['IS_FILE'] === 'Y') {
             if (is_array($_FILES) && count($_FILES)) {
                 foreach ($_FILES as $file) {
+
                     if (!empty($file['tmp_name'])) {
-                        // проверка файла по типу
-                        if (count($this->arParams['FILE_TYPE'])) {
-                            if (is_array($this->arParams['FILE_TYPE']) && !in_array($file['type'], $this->arParams['FILE_TYPE'])) {
-                                $this->arResult['ERRORS']['FILE'] = Loc::getMessage('ERROR_VALIDATE_FIELD_FILE_TYPE');
-                                continue;
-                            }
+
+                        // Проверка общей ошибки загрузки файла                         
+                        if ($file['error'] !== UPLOAD_ERR_OK) {
+                            $this->arResult['ERRORS']['FILE'] = Loc::getMessage('ERROR_VALIDATE_FIELD_FILE');
+                            continue;
                         }
 
-                        // проверка файла по размеру
-                        if ((int)$this->arParams['FILE_SIZE'] && (intval($file['size']) > intval($this->arParams['FILE_SIZE'] * 1048 * 1048))) {
+                        // Если FILE_TYPE оказался пустой, запрещаем загрузку любых файлов - подстраховка                                         
+                        if (
+                            !is_array($this->arParams['FILE_TYPE']) ||
+                            !count($this->arParams['FILE_TYPE'])
+                        ) {                            
+                            $this->arResult['ERRORS']['FILE'] = Loc::getMessage('ERROR_VALIDATE_FIELD_FILE_TYPE_EMPTY');
+                            continue;
+                        }
+
+                        // Проверка MIME-типа файла через finfo_file()                        
+                        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                        $realMime = finfo_file($finfo, $file['tmp_name']);
+                        finfo_close($finfo);                
+                        if (!$realMime || !in_array($realMime, $this->arParams['FILE_TYPE'])) {
+                            $this->arResult['ERRORS']['FILE'] = Loc::getMessage('ERROR_VALIDATE_FIELD_FILE_TYPE');
+                            continue;
+                        }
+
+                        // Проверка размера файла                         
+                        if (
+                            (int)$this->arParams['FILE_SIZE'] &&
+                            intval($file['size']) > intval($this->arParams['FILE_SIZE'] * 1048 * 1048)
+                        ) {
                             $this->arResult['ERRORS']['FILE'] = Loc::getMessage('ERROR_VALIDATE_FIELD_FILE_SIZE');
                             continue;
                         }
+                       
+                        // Сохраняем файл
                         $this->files[] = CFile::SaveFile($file, 'cf_files');
-                    } elseif ($this->arParams['FILE_REQUIRED'] === 'Y') { // проверка на пустоту, если задан параметр
-                        $this->arResult['ERRORS']['FILE'] = Loc::getMessage('FORM_REQUIRED_FIELD', ['FIELD' => 'файл']);
+
+                    } elseif ($this->arParams['FILE_REQUIRED'] === 'Y') {
+
+                        // Проверка обязательности файла                        
+                        $this->arResult['ERRORS']['FILE'] = Loc::getMessage(
+                            'FORM_REQUIRED_FIELD',
+                            [
+                                'FIELD' => 'файл'
+                            ]
+                        );
+
                     }
+
                 }
             }
         }

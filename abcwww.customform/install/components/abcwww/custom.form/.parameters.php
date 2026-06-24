@@ -217,7 +217,7 @@ $arComponentParameters = [
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" => "XLSX",
                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document" => "DOCX",
             ],
-            "DEFAULT" => "",
+            "DEFAULT" => "image/jpeg",
             "HIDDEN" => $arCurrentValues['IS_FILE'] === "Y" ? "N" : "Y",
         ],
         "FILE_FIELD_CODE" => [
@@ -266,7 +266,7 @@ $arComponentParameters = [
             "PARENT" => "FIELDS",
             "NAME" => Loc::getMessage('IS_ANTISPAM_NAME'),
             "TYPE" => "CHECKBOX",
-            "DEFAULT" => "Y",
+            "DEFAULT" => "",
         ],
         "IS_SEND_EMAIL" => [
             "PARENT" => "ADDITIONAL",
